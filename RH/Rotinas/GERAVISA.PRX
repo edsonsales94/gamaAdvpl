@@ -1,0 +1,1174 @@
+#include "rwmake.ch"
+#Define CRLF CHR(13)+CHR(10)
+
+ /*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ GeraVisa ³ Autor ³ Jose Carlos Gouveia   ³ Data ³ 21.07.03 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Gera‡„o do Arquivo Visa para Vale Alimentacao e Refeicao   ³±±
+±±³Descri‡„o ³ Versao do Lay-out - 007                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ Chamada padr„o para programas em RDMake.                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Jose Carlos ³17.05.05³XXXXX ³Retirado verif. faltas para Microsiga.    ³±±
+±±³            ³        ³      ³                                          ³±±
+±±³            ³        ³      ³                                          ³±±
+±±³            ³        ³      ³                                          ³±±
+±±³            ³        ³      ³                                          ³±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+User Function GeraVisa()
+
+/*
+// Instrucoes de Implantacao
+//Criar campo 
+//RA_VALEALI, Caracter,2,0
+//RA_GERCAR_,Caracter,1,0 
+//Criacao parametro auxiliar 
+*/
+
+
+// Declaracao de variaveis private
+SetPrvt("lEnd,lContinua,lAbortPrint,lImpLis,nHdl,nLin0,cPerg,cFilDe,cFilAte,cCcDe,cCcAte,cMatDe,cMatAte,nQtdFun,cCivi")
+SetPrvt("cGvt,cGva,cCodCon,cNomeCon,cNomeArq,cShowFil,cShowMat,cFil,cPerRef,cTipo,cEmp,cDtEntr,cDtEmis,cValRef,cMat,cArq")
+SetPrvt("cDatN,cDatA,cNomeF,cPis,cCic,cLin,dPerRef,dDtEnt,nDtrab,nDafas,nDfal,nValBen,nValBenT,nValRef,nSeq,lImpLis,lFlag,aReg,aInfoE")
+SetPrvt("aCamp,cString,aOrd,aReturn,nTamanho,Titulo,cDesc1,cDesc2,cDesc3,cCancel,wCabec1,wCabec2,NomeProg,cArqInd,cInd,nLastKey,m_pag,li")
+SetPrvt("ContFl,nOrdem,nTfunc,nTccFunc,nTBen,nTccBen,nTgfunc,nTgBen,wnrel,cGvr,cNumPed,cCcAnt,cCcDesc,nPerDes,cValAnt,nPos,aVa")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cNomeArq    := '' 
+cArq        := ''
+lEnd        := .F.
+lContinua   := .T.
+lAbortPrint := .F.
+lImpLis     := .F.
+nHdl        := 0 
+nLin0       := 0
+cPerg 		:= 'GERVIS'
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas                                                ³
+//ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+//³ mv_par01    Da Filial          -  Filial Inicial                     ³
+//³ mv_par02    Ate a Filial       -  Filial final                       ³
+//³ mv_par03    Do Centro de Custo -  Do Centro de Custo                 ³
+//³ mv_par04    Ate Centro de Custo-  Ate Centro de Custo                ³
+//³ mv_par05    Da Matricula       -  Matricula inicial                  ³
+//³ mv_par06    Ate a Matricula    -  Matricula final                    ³
+//³ mv_par07    Alimenta./Refeicao -  Alimentacao/Refeicao               ³
+//³ mv_par08    Periodo de Refer.  -  Data para Referencia               ³
+//³ mv_par09    Data de Efetivacao -  Data para Efetivacao               ³
+//³ mv_par10    Pedido Normal/Comp -  Pedido Normal/Complementar         ³
+//³ mv_par11    Nome do Contato    -  Nome do Contato na Empresa         ³
+//³ mv_par12    Codigo Contrato    -  Codigo Contrato                    ³
+//³ mv_par13    Numero do Pedido   -  Numero do Pedido                   ³
+//³ mv_par14    Centraliza Entrega -  Centraliza Entrega                 ³
+//³ mv_par15    Nome do Arquivo    -                                     ³
+//³ mv_par16    Imprime Listagem   -  Sim/Nao                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+VerPerg()
+
+Pergunte(cPerg,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Montagem da tela                                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+@ 000,000 TO 250,500 DIALOG oDlg TITLE 'Gera‡Æo de Arquivo Texto Visa'
+
+@ 030,010 SAY OemtoAnsi('Este programa ir  gerar um arquivo texto, conforme a parametri  ')
+@ 040,010 SAY OemtoAnsi('za‡„o definida pelo usu rio e Lay-Out definido pela Alelo,  ')
+@ 050,010 SAY OemtoAnsi('visando a aquisicao de vales-alimentacao, vales-refeiçao, ')
+@ 060,010 SAY OemtoAnsi('pedidos em meio magn‚tico. ')
+	
+@ 104,162 BMPBUTTON TYPE 5 ACTION Pergunte(cPerg, .T.)
+@ 104,190 BMPBUTTON TYPE 2 ACTION Close(oDlg) 		
+@ 104,218 BMPBUTTON TYPE 1 ACTION Continua()  
+
+@ 010,005 TO 100,245
+
+ACTIVATE DIALOG oDlg CENTERED
+
+If nHdl > 0
+	If fClose(nHdl)
+		If nLin0 > 0 .And. lContinua
+			Aviso('AVISO','Gerado o arquivo ' + AllTrim(cNomeArq) + '...',{'OK'})
+			
+			//Imprime Listagem
+			If lImpLis
+				fImpLis()
+			End
+
+		Else
+			If fErase(cNomeArq) == 0
+				If lContinua
+					Aviso('AVISO','N„o existem registros a serem gravados. A gera‡„o do arquivo ' + AllTrim(cNomeArq) + ' foi abortada ...',{'OK'})
+				EndIf	
+			Else
+
+				MsgAlert('Ocorreram problemas na tentativa de dele‡„o do arquivo '+AllTrim(cNomeArq)+'.')
+
+			EndIf	
+		EndIf	
+	Else
+
+		MsgAlert('Ocorreram problemas no fechamento do arquivo '+AllTrim(cNomeArq)+'.')
+
+	EndIf
+EndIf  
+          
+//Deleta Arquivo Temporario 
+If lImplis
+	If File(cArq + '.DBF')     
+		dbSelectArea('TMP')
+		dbCloseArea()
+		fErase(cArq + '.DBF')
+		FErase (cArqInd+OrdBagExt())
+	Endif	
+Endif
+	
+Return
+
+// Fim da Rotina
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ Continua     ³ Autor ³ Fernando Joly     ³ Data ³ 15.06.98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Fun‡„o para continua‡„o do processamento (na confirma‡„o)  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraKit                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function Continua()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa variaveis utilizadas pelo programa                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cFilDe		:= ''
+cFilAte		:= ''
+cCcDe		:= ''
+cCcAte		:= ''
+cMatDe		:= ''
+cMatAte		:= ''
+cGvt		:= ''
+cGva		:= ''
+cGvr		:= ''
+cCodCon		:= ''
+cNomeCon	:= ''
+cNomeArq	:= ''
+cShowFil	:= ''
+cShowMat	:= ''
+cFil		:= ''
+cPerRef		:= ''
+cPerPes		:= ''
+cTipo		:= ''
+cEmp		:= ''
+cDtEntr		:= ''
+cDtEmis		:= ''
+cValRef		:= ''
+cMat		:= ''
+cDatN		:= ''
+cDatA		:= ''
+cNomeF		:= ''
+cPis		:= ''
+cCic		:= ''
+cLin		:= ''
+cArq		:= ''
+cNumPed		:= ''
+cGera		:= ''
+cDiasMes	:= ''
+cValAnt		:= ''
+cCivi		:= ''
+dPerRef		:= cTod("  /  /  ")
+dDtEnt		:= cTod("  /  /  ")
+nDtrab		:= 0
+nDafas		:= 0
+nDfal		:= 0
+nValBen		:= 0
+nValBenT	:= 0
+nValRef		:= 0
+nSeq		:= 0
+nQtdFun		:= 0    
+nPerDes		:= 0
+nPos		:= 0
+lImpLis		:= .F.
+lFlag		:= .F.
+aReg		:= {}
+aInfoE		:= {}
+aCamp		:= {}
+aVa			:= {}
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa variaveis utilizadas como Pergunte                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cFilDe   := mv_par01 // Da Filial
+cFilAte  := mv_par02 // Ate a Filial
+cCcDe    := mv_par03 // Do Centro de Custo
+cCcAte   := mv_par04 // Ate Centro de Custo
+cMatDe   := mv_par05 // Da Matricula
+cMatAte  := mv_par06 // Ate a Matricula
+cGvt     := If(mv_par07==1,"1","2") //Vale Refeicao/Vale Alimentacao
+dPerRef  := If(Empty(mv_par08),dDataBase,mv_par08) // Periodo de Referencia
+dDtEnt   := If(Empty(mv_par09),dDataBase,mv_par09) // Data da Efetivacao
+cGva     := If(mv_par10==1,"1","2") //Pedido Normal/Complementar
+cNomeCon := mv_par11 // Nome do Contato na Empresa
+cCodCon	 := mv_par12 // Codigo Contrato
+cNumPed	 := mv_par13 // Numero do Pedido
+cGvr	 := If(mv_par14==1,"2","1")
+cNomeArq := mv_par15 // Nome do Arquivo
+lImpLis  := If(mv_par16==1,.T.,.F.) //Imprime Listagem
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria o arquivo texto                                                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+While .T.
+	If File(cNomeArq)
+		If (nAviso := Aviso('AVISO','Deseja substituir o ' + AllTrim(cNomeArq) + ' existente ?', {'Sim','N„o','Cancela'})) == 1
+			If fErase(cNomeArq) == 0
+				Exit
+			Else
+				MsgAlert('Ocorreram problemas na tentativa de dele‡„o do arquivo '+AllTrim(cNomeArq)+'.')
+			EndIf		
+		ElseIf nAviso == 2
+			Pergunte(cPerg,.T.)				
+			Loop
+		Else
+			Return
+		EndIf		
+	Else
+		Exit
+	EndIf	
+EndDo	     
+
+nHdl := fCreate(cNomeArq)
+
+If nHdl == -1
+	MsgAlert('O arquivo '+AllTrim(cNomeArq)+' n„o p“de ser criado! Verifique os parƒmetros.','Aten‡„o!')
+	Return
+Endif
+       
+//Carrega Dados da Filial
+fLocalInfo()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria Arquivo Temporario de Impressao                         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If lImpLis
+	//Criacao do Array               
+	aadd(aCamp,{'TP','C',1,0})
+	aadd(aCamp,{'FIL','C',2,0})
+	aadd(aCamp,{'CC','C',9,0})
+	aadd(aCamp,{'MAT','C',6,0})
+	aadd(aCamp,{'CAMPO','C',55,0})
+
+	//Nome e Criacao do Arquivo
+	cArq := Criatrab(aCamp,.t.)
+
+	//Abertura do Arquivo
+	dbUseArea(.t.,,cArq,'TMP')
+	dbSelectArea('TMP')
+	
+Endif	
+
+// Inicializa processamento
+
+Processa({|lEnd| RunCont()}, 'Processando...')
+Close(oDlg)
+Return  
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³   RunCont    ³ Autor ³Jose Carlos Gouveia³ Data ³ 15.06.98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Processamento                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ RDMAKE                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraCard                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function RunCont()
+
+//Posiciona Indices
+dbSelectArea('SRD')
+dbSetOrder(1)
+
+dbSelectArea('SRA')
+dbSetOrder(2)
+dbSeek(cFilDe + cCcDe + cMatDe, .T.)
+ProcRegua(SRA->(RecCount())) 
+
+cShowFil := Space(Len(SRA->RA_FILIAL))
+cShowMat := Space(Len(SRA->RA_MAT))
+cFil     := SRA->RA_FILIAL 
+
+//Periodo de Referencia
+cPerRef := AllTrim(StrZero(Month(dPerRef),2)) + AllTrim(Str(Year(dPerRef)))
+
+// Processamento
+While !SRA->(Eof()) .And. SRA->RA_FILIAL + SRA->RA_CC + SRA->RA_MAT <= cFilAte + cCcAte + cMatAte .And. lContinua
+
+	cShowFil  := SRA->RA_FILIAL
+	cShowMat  := SRA->RA_MAT                    
+    nDtrab    := 30
+    nDfal	  := 0
+		
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Incrementa a regua                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	IncProc('Gerando o Arquivo... Fil. / Mat.: ' + cShowFil + ' / ' + cShowMat)
+	If lAbortPrint .Or. lEnd
+		If Aviso('ATEN€AO','Deseja abandonar a Gera‡„o do arquivo ' + AllTrim(AllTrim(cNomeArq)) + ' ?',{'Sim','N„o'}) == 1
+			lContinua := .F.
+			Exit
+		EndIf	
+	Endif
+	
+	//Filtra Demitidos
+	If SRA->RA_SITFOLH =='D'
+		SRA->(dbSkip())
+		Loop
+	End
+	
+	// Verifica Filtro Conforme Parametros
+	If SRA->RA_FILIAL < cFilDe .Or. SRA->RA_FILIAL > cFilAte .Or. ;
+	  SRA->RA_CC < cCcDe .Or. SRA->RA_CC > cCcAte .Or. ;
+	  SRA->RA_MAT < cMatDe .Or. SRA->RA_MAT > cMatAte
+		SRA->(dbSkip())	
+		Loop
+	EndIf	
+
+    // Verifica Dias de Afastamento
+	fDiasAfast(@nDafas,@nDtrab,dPerRef)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Gera Vale Refeicao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If cGvt == "2"     
+		//Verifica se Funcionario Vale Refeicao
+		If ! Empty(SRA->RA_VALEREF)
+			
+			If cValAnt != SRA->RA_VALEREF
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Informacoes de Vales-Refei‡„o (SRA e SRX)                           ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				If !Empty(SRA->RA_VALEREF) .And. SRX->(dbSeek(xFilial('SRX') + '26' + SRA->RA_FILIAL + Space(10) + SRA->RA_VALEREF, .F.))
+					lFlag := .T.                                                                       
+				Else
+					If !Empty(SRA->RA_VALEREF) .And. SRX->(dbSeek(xFilial('SRX') + '26' + Space(12) + SRA->RA_VALEREF, .F.))
+						lFlag := .T.
+					End
+				End   
+				cValAnt := SRA->RA_VALEREF
+			Else
+				lFlag := .T.
+			Endif
+				
+			If lFlag 
+				
+				//Valor do Vale (Quantidade * Valor)
+				nValRef := Val(Subst(SRX->RX_TXT,33,3)) * Val(Subst(SRX->RX_TXT,21,12))
+				nPerDes := Val(Subst(SRX->RX_TXT,36,7))
+					
+            	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	           	//³ Gera Vale Refeicao para Ferias e Afastados                   ³
+		        //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    	        If ( SRA->RA_SITFOLH == "F" .And. GetMv("MV_CALREFE") == "S" ) .Or.;
+        	       ( SRA->RA_SITFOLH == "A" .And. GetMv("MV_CALREAF") == "S" ) .Or.;
+           		   ( SRA->RA_SITFOLH == " " )
+	               	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ Calc. dias proporc.Dt Admissao ou Calc.Prop.p/ Afastados     ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					If ( SRA->RA_SITFOLH == "F" .And. GetMv("MV_CALREFE") == "S" .And.;
+						 GetMv("MV_CALREPR") == "S" ) .Or.;
+						( SRA->RA_SITFOLH == "A" .And. GetMv("MV_CALREAF") == "S" .And.;
+						 GetMv("MV_CALREPR") == "S" ) .Or.;
+						( SRA->RA_SITFOLH == " " .And. GetMv("MV_CALREAD") == "S" )
+							
+						If (nDtrab - nDfal) <= 0
+							SRA->(dbSkip())
+							Loop
+						EndIf
+							
+						nValBen := Round(nValRef/30 * (nDtrab - nDfal),2)
+                		    
+					Else                   
+	
+		               	nValBen := Round(nValRef/30 * (30 - nDfal),2)
+						
+					Endif
+            		
+            	Else
+            		SRA->(dbSkip())
+            		Loop
+            	Endif
+				
+				If nLin0 == 0
+			    	nLin0 += 1
+			    Endif
+					
+				lFlag := .F.
+				fGeraTipo5()
+				
+				//Totaliza Funcionario e Beneficio
+				nQtdFun  += 1
+				nValBenT += nValBen
+				
+				//Zera Variaveis
+				nDtrab := 0
+				nDfal  := 0
+						
+			EndIf
+		
+		Endif	
+    
+	Else
+	
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Gera Vale Alimentacao                                               ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+		//Verifica se Funcionario tem Vale Alimentacao
+		If Type('SRA->RA_VALEALI') != "U"
+
+			If ! Empty(SRA->RA_VALEALI)
+			
+				If cValAnt != SRA->RA_VALEALI
+					//Informacoes de Vales-Alimentacao Localizada na Tabela RCC Código U005
+					If RCC->(dbSeek(xFilial('RCC') + 'U005'))
+						While RCC->RCC_CODIGO == 'U005'
+							aAdd(aVa,{Subst(RCC->RCC_CONTEU,1,2),Subst(RCC->RCC_CONTEU,3,12),Val(Subst(RCC->RCC_CONTEU,13,12)),;
+							    Val(Subst(RCC->RCC_CONTEU,25,2))})
+
+   							RCC->(dbSkip())
+
+   						Enddo
+					Endif
+					
+					cValAnt := SRA->RA_VALEALI
+					
+					If ( nPos := Ascan(aVa,{ |X| x[1] = cValAnt } )) > 0
+						lFlag	:= .T.
+					Else
+						lFlag	:= .F.
+					Endif
+						
+				Else
+					lFlag := .T.
+				Endif			
+
+				If lFlag
+
+					//Valor do Vale (Quantidade * Valor)
+					nValRef := aVa[nPos,3] * aVa[nPos,4]
+					nPerDes := 0.00
+						
+	       	    	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    	        	//³ Gera Vale Refeicao para Ferias e Afastados                   ³
+	    	        //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+   		    	    If ( SRA->RA_SITFOLH == "F" .And. GetMv("MV_CALREFE") == "S" ) .Or.;
+       		    	   ( SRA->RA_SITFOLH == "A" .And. GetMv("MV_CALREAF") == "S" ) .Or.;
+	           		   ( SRA->RA_SITFOLH == " " )
+    	            	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+						//³ Calc. dias proporc.Dt Admissao ou Calc.Prop.p/ Afastados     ³
+						//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+						If ( SRA->RA_SITFOLH == "F" .And. GetMv("MV_CALREFE") == "S" .And.;
+							 GetMv("MV_CALREPR") == "S" ) .Or.;
+							( SRA->RA_SITFOLH == "A" .And. GetMv("MV_CALREAF") == "S" .And.;
+							 GetMv("MV_CALREPR") == "S" ) .Or.;
+							( SRA->RA_SITFOLH == " " .And. GetMv("MV_CALREAD") == "S" )
+							
+							If (nDtrab - nDfal) <= 0
+								SRA->(dbSkip())
+								Loop
+							EndIf
+						
+							nValBen := Round(nValRef/30 * (nDtrab - nDfal),2)
+					
+	                   	Else	
+            		 
+    	        			nValBen := Round(nValRef/30 * (30 - nDfal),2)
+        	
+	   					Endif
+    					        		
+    	       		Else
+        	   			SRA->(dbSkip())
+           				Loop
+           			Endif
+			                   
+			    	If nLin0 == 0
+			    		nLin0 += 1
+			    	Endif
+			    		 
+					lFlag := .F.			    		
+					fGeraTipo5()
+
+					//Totaliza Funcionario e Beneficio
+					nQtdFun  += 1
+					nValBenT += nValBen 
+				
+					//Zera Variaveis
+					nDtrab := 0
+					nDfal  := 0
+				
+				EndIf 
+			
+			Endif		
+		
+		Endif
+		
+//		If cFil != SRA->RA_FILIAL
+//			cFil := SRA->RA_FILIAL
+//			fGeraTipo1()
+//		Endif	
+    
+    Endif
+	
+   	SRA->(dbSkip())                
+   	
+EndDo          
+
+fGeraTipo9()
+
+Return
+
+// Fim da Rotina
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ fGeraTipo0   ³ Autor ³Jose Carlos Gouveia³ Data ³ 15.06.98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Gera linha com Registro Tipo "0"                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ RDMAKE                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraKit                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function fGeraTipo0()
+
+cTipo         := '0'
+cEmp          := Substr(aInfoE[2] + Space(40),1,35)
+cDtEntr       := AllTrim(StrZero(Day(dDtEnt),2)) + AllTrim(StrZero(Month(dDtEnt),2)) + AllTrim(Str(Year(dDtEnt)))
+cDtEmis       := AllTrim(StrZero(Day(dDataBase),2)) + AllTrim(StrZero(Month(dDataBase),2)) + AllTrim(Str(Year(dDataBase)))
+cNumPed		  := AllTrim(StrZero(Val(cNumPed),6))
+			
+cLin := cTipo + cDtEmis + "A001"  + cEmp + aInfoE[9] + Replic("0",11) + cCodCon + cNumPed + cDtEntr + cGvt
+cLin += cGva + cPerRef + Space(18) + "007" + Space(267) + StrZero(nSeq,6) +  CRLF 
+
+nSeq += 1
+
+fGravaReg()
+
+If lImpLis
+	If RecLock("TMP",.T.)
+		TMP->TP		:= cTipo
+		TMP->CAMPO := cEmp + cDtEntr + cGvt + cGva 
+	Endif	
+Endif	
+
+fGeraTipo1()
+			
+Return
+
+// Fim da Rotina
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ fGeraTipo1   ³ Autor ³Jose Carlos Gouveia³ Data ³ 13.01.01 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Gera linha com Registro Tipo "1"                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ RDMAKE                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraKit                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function fGeraTipo1()
+        
+cTipo   := '1'           
+
+cLin    := cTipo +	aInfoE[09] + Replic("0",10) + Subst(aInfoE[10] + Space(35),1,35) + "0000" + Subst(cNomeCon + Space(35),1,35)
+cLin    += Space(40) + Replic("0",18) + Space(75) + Replic("0",18) + Space(75) + Replic("0",18) + Space(20) + Space(31)
+cLin 	+= StrZero(nSeq,6) + CRLF
+
+fGravaReg()
+
+If lImpLis
+	If RecLock("TMP",.T.)
+		TMP->TP 	:= cTipo
+		TMP->FIL	:= cFil
+		TMP->CAMPO := aInfoE[10]
+	Endif	
+Endif	
+
+nSeq += 1
+            
+Return
+
+// Fim da Rotina
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ fGeraTipo5   ³ Autor ³Jose Carlos Gouveia³ Data ³ 21.07.03 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Gera linha com Registro Tipo "5"                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ RDMAKE                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraVisa                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function fGeraTipo5()
+
+//Gera Registro tipo Zero
+If nSeq == 0
+	nSeq += 1
+	fGeraTipo0()
+Endif	 
+
+cTipo 	:= "5"
+cValRef := StrZero(nValBen * 100,11) 
+cMat 	:= Subst(SRA->RA_MAT + Space(13),1,13)
+cDatN	:= AllTrim(StrZero(Day(SRA->RA_NASC),2)) + AllTrim(StrZero(Month(SRA->RA_NASC),2)) + AllTrim(Str(Year(SRA->RA_NASC)))
+cDatA	:= AllTrim(StrZero(Day(SRA->RA_ADMISSA),2)) + AllTrim(StrZero(Month(SRA->RA_ADMISSA),2)) + AllTrim(Str(Year(SRA->RA_ADMISSA)))
+cNomeF	:= Subst(SRA->RA_NOME + Space(40),1,40)
+cCic	:= Iif(Empty(SRA->RA_CIC),Replic("0",11),Subst(SRA->RA_CIC,1,11))	
+cPis	:= Iif(Empty(SRA->RA_PIS),Replic("0",15),StrZero(Val(SRA->RA_PIS),15))
+
+//Gerar cartão e senha
+If Type('SRA->RA_GERCAR_') != "U"
+	If SRA->RA_GERCAR_ $ "12"
+		cGera := "C"
+	ElseIf SRA->RA_GERCAR_ == "3"
+		cGera := "S"
+	Else
+		cGera := ' ' 
+	Endif
+Else
+	cGera := ' '
+Endif
+
+//Codigo de Estado Civil
+If SRA->RA_ESTCIVI == "S"
+	cCivi	:= "1"
+ElseIf SRA->RA_ESTCIVI == "C"
+	cCivi	:= "2"
+ElseIf SRA->RA_ESTCIVI == "V"
+	cCivi	:= "3"
+ElseIf SRA->RA_ESTCIVI $ "D*Q"
+	cCivi	:= "4"
+Else
+	cCivi	:= "5"
+Endif				
+		
+cLin 	:= cTipo + cValRef + cGera + cMat + Space(54) + cDatN + cCic + Space(40) + cPis + SRA->RA_SEXO
+cLin	+= cCivi + Space(45) + Replic("0",13) + Space(96) + Replic("0",28) + " " + cDatA + " " + cNomeF 
+cLin	+= Space(6) + StrZero(nSeq,6) + CRLF
+
+fGravaReg()
+
+If lImpLis
+	If RecLock("TMP",.T.)
+		TMP->TP		:= 	cTipo 
+		TMP->FIL	:= cFil
+		TMP->CC		:=	SRA->RA_CC 
+		TMP->MAT	:= SRA->RA_MAT
+		TMP->CAMPO	:= cNomeF + cValRef + StrZero(nDtrab,2) + StrZero(nDfal,2)
+	Endif	
+Endif	
+
+nSeq += 1
+
+Return
+
+//Fim da Rotina
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ fGeraTipo9   ³ Autor ³Jose Carlos Gouveia³ Data ³ 21.07.03 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Gera linha com Registro Tipo "9"                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ RDMAKE                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraVisa                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function fGeraTipo9()
+
+cTipo := "9" 
+
+cLin := cTipo + StrZero(nQtdFun,6) + StrZero(nValBenT * 100,15) + Space(372) + StrZero(nSeq,6)
+
+fGravaReg()
+
+Return
+
+//Fim da Rotina
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ fGravaReg    ³ Autor ³Jose Carlos Gouveia³ Data ³ 06.11.00 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Grava Registros no Arquivo Texto                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ fGravaReg()                                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraKit                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function fGravaReg()
+
+If fWrite(nHdl,cLin,Len(cLin)) != Len(cLin)
+	If !MsgYesNo('Ocorreu um erro na gravacao do arquivo '+AllTrim(cNomeArq)+'.   Continua?','Atencao!')
+		lContinua := .F.
+		Return
+	Endif
+Endif            
+	
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³   fImpLis    ³ Autor ³Jose Carlos Gouveia³ Data ³ 13.01.01 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Imprime Listagem de Pedidos do Kit                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ fImpLis()                                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraKit                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function fImpLis()
+
+cString  := 'SRA' // Alias do Arquivo Principal
+aOrd     := {"Matricula","Centro de Custo"}
+aReturn  := { 'Especial', 1,'Administra‡„o', 1, 2, 2,'',1 }
+nTamanho := 'P'
+Titulo   := 'LISTAGEM DE BENEFICIOS DO VISA VALE'
+cDesc1   := 'Emissao de Relatorio de Vale Refeicao e Vale Alimentaca. '
+cDesc2   := 'Sera impresso de acordo com os parametros solicitados '
+cDesc3   := 'pelo usuario.'
+cPerg    := ''
+cCancel  := '*** ABORTADO PELO OPERADOR ***'
+wCabec1	 := ' Matr.              Nome                         Valor Beneficio   Dias   Faltas '
+wCabec2  := '	                                                                 Benef.       '
+NomeProg := 'GERACARD'
+cArqInd  := ''
+cInd	 := ''
+cCcAnt	 := ''
+cCcDesc	 := ''
+nLastKey := 0
+m_pag    := 0
+li       := 0
+ContFl   := 1 
+nOrdem	 := 0
+nTfunc   := 0 
+nTccFunc := 0
+nTBen    := 0
+nTccBen  := 0
+nTgfunc  := 0
+nTgBen   := 0
+lEnd     := .F.
+wnrel    := 'GERAVISA'
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel := SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd,.F.,nTamanho)
+
+If nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	Return
+Endif
+
+// Inicio do Arquivo Temporario
+dbSelectArea('TMP')
+TMP->(dbGoTop())
+
+nOrdem   := aReturn[8]
+
+//Processa Selecao de Ordem
+Processa({|lEnd| ContOrd()},"Ordenando Arquivo...")
+
+//Processa Impressao
+RptStatus({|lEnd| Nota()},'Imprimindo...')
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³     Nota     ³ Autor ³Jose Carlos Gouveia³ Data ³ 13.01.01 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Imprime Listagem de Pedidos do Kit                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ Nota()                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraCard                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function ContOrd()
+
+//Cria Indice Temporario
+//Nome do Indice
+cArqInd := CriaTrab(Nil,.F.)
+
+//Chave do Indice
+If nOrdem == 1
+	cInd := "FIL + MAT"
+Else	
+	cInd := "FIL + CC + MAT"
+Endif
+
+//Criacao do Indice
+IndRegua("TMP",cArqInd,cInd,,,"Selecionando Registros")	
+
+Return
+
+//Fim da Rotina
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³     Nota     ³ Autor ³Jose Carlos Gouveia³ Data ³ 13.01.01 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Imprime Listagem de Pedidos do Kit                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ Nota()                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraCard                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function Nota()
+
+// Carrega Regua
+SetRegua(TMP->(RecCount())) 
+
+
+While !TMP->(Eof())
+
+	//Abortado Pelo Operador
+	If lAbortPrint
+		lEnd := .T.
+	Endif
+
+	If lEnd
+		cDet := cCancel
+		Impr(cDet,'C')
+		Exit
+	EndIF			
+
+	If TMP->TP == '0'
+		
+   //		cDet := Replic('*',80)
+//		Impr(cDet,'C')
+		cDet := 'Empresa: ' + Subst(TMP->CAMPO,1,35)
+		Impr(cDet,'C')
+        cDet := 'Data Entrega: ' + Subst(TMP->CAMPO,36,2) + '/' + Subst(TMP->CAMPO,38,2) + '/' + Subst(TMP->CAMPO,40,4)
+        cDet += '  -  Tipo Beneficio: ' + Iif(Subst(TMP->CAMPO,44,1) == '1', 'Alimentacao', 'Refeicao') 
+        cDet += Iif(Subst(TMP->CAMPO,45,1) ==  '1',' - Pedido Normal',' - Pedido Complementar')
+		Impr(cDet,'C')
+									
+		TMP->(dbSkip())
+        
+		IncRegua('Imprimindo.... ')
+		
+		Loop
+
+	Endif
+
+	If TMP->TP == '1'
+		
+		cDet := Replic('*',80)
+		Impr(cDet,'C')
+		cDet := 'Filial: ' + TMP->FIL + "-" + Subst(TMP->CAMPO,1,35)
+		Impr(cDet,'C')
+		
+		cDet := ''
+        Impr(cDet,'C')
+				
+		// Zerando Variaveis
+		nTfunc    := 0
+		nTBen     := 0
+					
+		TMP->(dbSkip())
+        
+		IncRegua('Imprimindo.... ')
+		
+		Loop
+
+	Endif
+	
+	cCcAnt  := TMP->CC
+	cCcDesc := DescCC(cCcAnt)
+	
+	If (nOrdem == 2)
+		
+		cCcAnt  := TMP->CC
+		cCcDesc := DescCC(cCcAnt)
+				
+		cDet := cCcAnt + ' - ' + cCcDesc
+		Impr(cDet,'C')
+			            
+	Endif	
+	
+	While TMP->TP == '5' .And. !TMP->(Eof()) .And. !lEnd
+	
+		If (nOrdem == 2) .And. (cCcAnt != TMP->CC)
+		
+				cCcAnt  := TMP->CC
+				cCcDesc := DescCC(cCcAnt)
+				
+				cDet := cCcAnt + ' - ' + cCcDesc
+				Impr(cDet,'C')
+			            
+		Endif	
+    	                                                                   
+		//Abortado Pelo Operador
+		If lAbortPrint
+			lEnd := .T.
+		Endif
+    	        
+		If lEnd
+			cDet := cCancel
+			Impr(cDet,'C')
+			Exit
+		EndIF			    	        
+                
+		cDet := TMP->MAT + "  "  +  Subst(TMP->CAMPO,1,40) + "  " + Transform(Val(Subst(TMP->CAMPO,41,11))/100,'@E 999,999,999.99')
+		cDet += "    " + Subst(TMP->CAMPO,52,2) + "      " + Subst(TMP->CAMPO,54,2)
+		Impr(cDet,'C')
+
+		//Totaliza 							
+		nTBen   += Val(Subst(TMP->CAMPO,41,11))/100
+		nTfunc  += 1
+
+		//Totaliza por Centro de Custo		
+		nTccBen  += Val(Subst(TMP->CAMPO,41,11))/100		
+		nTccfunc += 1
+				 
+		TMP->(dbSkip())       
+		
+		If (nOrdem == 2) .And. (cCcAnt != TMP->CC)
+
+				cDet := 'Totais do Centro de Custo - ' + cCcAnt + ' - '  + cCcDesc
+				Impr(cDet,'C')
+								
+				cDet := 'Total Beneficio (R$): ' + Transform(nTccBen,'@E 999,999,999.99') 
+				Impr(cDet,'C')
+				
+				cDet := 'Total Funcionario: ' + Transform(nTccfunc,'@E 99999') 
+				Impr(cDet,'C')
+                               
+				cDet := '' 
+				Impr(cDet,'C')
+				
+				//Zera Variaveis
+				nTccBen  := 0		
+				nTccfunc := 0
+
+		Endif	
+
+		
+		IncRegua('Imprimindo... ')
+	
+	Enddo
+
+	cDet := ''
+	Impr(cDet,'C')
+	
+	cDet := 'Totais da Filial ' 
+	Impr(cDet,'C')
+	
+	cDet := 'Funcionarios ' + Transform(nTFunc,'@E 99999')
+	Impr(cDet,'C')
+	
+	If nTBen > 0
+		cDet:= 'Valor do Beneficio R$: ' + Transform(nTBen,'@E 999,999,999.99') 
+		Impr(cDet,'C')
+	Endif
+                         
+	//Acumula Totais
+	nTgfunc   += nTfunc
+	nTgBen    += nTBen  
+	
+	//Zera Variaveis
+	nTfunc    := 0
+	nTBen     := 0
+
+Enddo						                                    
+            
+//Imprime Total Geral da Empresa
+cDet := ''
+Impr(cDet,'C')
+
+cDet := Replic('*',80)
+Impr(cDet,'C')
+
+cDet := 'Totais da Empresa ' 
+Impr(cDet,'C')
+	
+cDet := 'Funcionarios ' + Transform(nTgfunc,'@E 99999')
+Impr(cDet,'C')
+	
+If nTgBen > 0
+	cDet:= 'Valor do Beneficio R$: ' + Transform(nTgBen,'@E 999,999,999.99') 
+	Impr(cDet,'C')
+Endif
+
+cDet := ''
+Impr(cDet,'F')
+
+If aReturn[5] == 1
+	Set Printer TO
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return
+
+// Fim da Rotina
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ fLocalInfo   ³ Autor ³ Fernando Joly     ³ Data ³ 15.06.98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Inicializa o Array aInfo com informacoes do Local          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ fCallFunc()                                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraKit                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function fLocalInfo()
+                                     
+aInfoE := {}
+
+// Armazena Registro Atual
+nSM0Recno := SM0->(Recno())
+
+SM0->(dbSeek(cEmpAnt + cFilAnt,.T.))
+
+Aadd(aInfoE,SM0->M0_NOME)
+Aadd(aInfoE,SM0->M0_NOMECOM)
+Aadd(aInfoE,SM0->M0_ENDENT)
+Aadd(aInfoE,SM0->M0_CIDENT)
+Aadd(aInfoE,SM0->M0_ESTENT)
+Aadd(aInfoE,SM0->M0_CEPENT)
+Aadd(aInfoE,SM0->M0_BAIRENT)
+Aadd(aInfoE,SM0->M0_COMPENT)
+Aadd(aInfoE,SM0->M0_CGC)
+Aadd(aInfoE,SM0->M0_FILIAL)
+
+// Retorna ao Registro
+SM0->(dbGoto(nSM0Recno))
+
+Return
+
+// Fim da Rotina
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³   VerPerg    ³ Autor ³Jose Carlos Gouveia³ Data ³ 15.06.98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Verifica  as perguntas, Incluindo-as caso n„o existam      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ VerPerg                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ GeraVisa                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function VerPerg()
+
+aRegs     := {}
+
+cPerg := Left(cPerg,6)
+
+//X1_GRUPO,X1_ORDEM,X1_PERGUNT,X1_PERSPA,X1_PERENG,X1_VARIAVL,X1_TIPO,X1_TAMANHO,X1_DECIMAL,X1_PRESEL,X1_GSC,X1_VALID,X1_VAR01,X1_DEF01,X1_DEFSPA1,X1_DEFENG1,X1_CNT01,X1_VAR02,X1_DEF02,X1_DEFSPA2,X1_DEFENG2,X1_CNT02,X1_VAR03,X1_DEF03,X1_DEFSPA3,X1_DEFENG3,X1_CNT03,X1_VAR04,X1_DEF04,X1_DEFSPA4,X1_DEFENG4,X1_CNT04,X1_VAR05,X1_DEF05,X1_DEFSPA5,X1_DEFENG5,X1_CNT05,X1_F3,X1_PYME,X1_GRPSXG,X1_HELP  
+aAdd(aRegs,{cPerg,"01","Da Filial          ?","Da Filial          ?","Da Filial          ?","mv_ch1","C",2,0,0,"G","","mv_par01","","","","01","","","","","","","","","","","","","","","","","","","","","SM0","","",""})
+aAdd(aRegs,{cPerg,"02","Ate a Filial       ?","Ate a Filial       ?","Ate a Filial       ?","mv_ch2","C",2,0,0,"G","","mv_par02","","","","99","","","","","","","","","","","","","","","","","","","","","SM0","","",""})
+aAdd(aRegs,{cPerg,"03","Do Centro Custo    ?","Do Centro de Custo ?","Do Centro de Custo ?","mv_ch3","C",9,0,0,"G","","mv_par03","","","","000000001","","","","","","","","","","","","","","","","","","","","","SI3","","",""})
+aAdd(aRegs,{cPerg,"04","At‚ Centro de Custo?","At‚ Centro de Custo?","At‚ Centro de Custo?","mv_ch4","C",9,0,0,"G","","mv_par04","","","","999999999","","","","","","","","","","","","","","","","","","","","","SI3","","",""})
+aAdd(aRegs,{cPerg,"05","Da Matricula       ?","Da Matricula       ?","Da Matricula       ?","mv_ch5","C",6,0,0,"G","","mv_par05","","","","000001","","","","","","","","","","","","","","","","","","","","","SRA","","",""})
+aAdd(aRegs,{cPerg,"06","Ate Matricula      ?","Ate Matricula      ?","Ate Matricula      ?","mv_ch6","C",6,0,0,"G","","mv_par06","","","","999999","","","","","","","","","","","","","","","","","","","","","SRA","","",""})
+aAdd(aRegs,{cPerg,"07","Aliment./Refeicao  ?","Aliment./Refeicao  ?","Aliment./Refeicao  ?","mv_ch7","N",1,0,2,"C","","mv_par07","Alimentacao","Alimentacao","Alimentacao","","","Refeicao","Refeicao","Refeicao","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"08","Data de Referencia ?","Data de Referencia ?","Data de Referencia ?","mv_ch8","D",8,0,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"09","Data Efetivacao    ?","Data Efetivacao    ?","Data Efetivacao    ?","mv_ch9","D",8,0,0,"G","naovazio","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"10","Normal/Complementar?","Normal/Complementar?","Normal/Complementar?","mv_cha","N",1,0,0,"C","","mv_par10","Normal","Normal","Normal","","","Complementar","Complementar","Complementar","","","","","","","","","","","","","","","","","","","",""})  
+aAdd(aRegs,{cPerg,"11","Nome do Contato    ?","Nome do Contato    ?","Nome do Contato    ?","mv_chb","C",35,0,0,"G","naovazio","mv_par11","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"12","Codigo Contrato    ?","Codigo Contrato    ?","Codigo Contrato    ?","mv_chc","C",11,0,0,"G","naovazio","mv_par12","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"13","Numero Pedido      ?","Numero Pedido      ?","Numero Pedido      ?","mv_chd","C",6,0,0,"G","naovazio","mv_par13","","","","000000","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"14","Centraliza Entrega ?","Centraliza Entrega ?","Centraliza Entrega ?","mv_che","N",1,0,2,"C","","mv_par14","Sim","Sim","Sim","","","Nao","Nao","Nao","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"15","Nome do Arquivo    ?","Nome do Arquivo    ?","Nome do Arquivo    ?","mv_chf","C",25,0,0,"G","naovazio","mv_par15","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"16","Imprime Listagem   ?","Imprime Listagem   ?","Imprime Listagem   ?","mv_chg","N",1,0,2,"C","","mv_par16","Sim","Sim","Sim","","","Nao","Nao","Nao","","","","","","","","","","","","","","","","","","","",""})
+
+ValidPerg(aRegs,cPerg ,.F.)
+
+Return
+
+// Fim da Rotina
+
+// Fim do Programa

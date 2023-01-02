@@ -1,0 +1,646 @@
+#Include 'Protheus.ch'
+
+#include "rwmake.ch"
+
+user function MA330TRB()
+
+	LOCAL WRECNO
+	LOCAL WPROD
+	LOCAL WLOCAL
+	LOCAL WNUMSEQ
+	LOCAL LTEM:=.F.
+	LOCAL WFILIAL
+	LOCAL WALIAS
+	LOCAL WNIVEL
+	LOCAL WNIVSD3
+    Local lteste:=.T.
+	local warea:= getarea()
+
+	LOCAL _CFILIAL:= SM0->M0_CODFIL
+
+	IF MV_PAR14 <> 2 .OR. _CFILIAL<>'99' 
+		RETURN        //SOMENTE EXECUTO SE APROPRIACAO MENSAL
+	ENDIF
+
+	cQuery := " DROP TABLE TRB010AM "
+	nErro := TCSQLExec(cQuery)
+	If nErro > 0
+		msgstop("Nao foi possivel realizar a limpeza da tabela! Chame o Administrador! ","Erro ...")
+	Endif
+	DBSELECTAREA("TRB")
+	COPY TO TRB010AM VIA  "TOPCONN
+	//INDICE AUXILIAR DA TABELA AUXILIAR
+	/*
+	cQuery := " CREATE NONCLUSTERED INDEX IDX_TRB010AM "
+	cQuery += " ON [dbo].[TRB010AM] ([TRB_FILIAL],[TRB_COD],[TRB_CF],[TRB_LOCAL]) "
+	cQuery += " INCLUDE ([TRB_FILTRA],[TRB_ALIAS],[TRB_RECNO],[TRB_ORDEM],[TRB_CHAVE],[TRB_NIVEL],"
+	cQuery += " [TRB_NIVSD3],[TRB_DTBASE],[TRB_OP],[TRB_SEQ],[TRB_SEQPRO],[TRB_DTORIG],[TRB_RECSD1],"
+	cQuery += " [TRB_TES],[TRB_DOC],[TRB_SERIE],[TRB_TIPO],[TRB_RECSBD],[TRB_RECTRB],[TRB_TIPONF],[TRB_QINI],"
+	cQuery += " [TRB_QUANT],[TRB_QFIM],[TRB_FLAG],[TRB_RNOAUX],[TRB_USATRA],[D_E_L_E_T_],[R_E_C_N_O_]) "
+	nErro := TCSQLExec(cQuery)
+	If nErro > 0
+		msgstop("Nao foi possivel realizar a limpeza da tabela! Chame o Administrador! ","Erro ...")
+	Endif
+  */
+	//use trbcus new alias "SAND"
+	//IndRegua( "SAND", "SAND", "TRB_COD+TRB_LOCAL+TRB_ORDEM",,, OemToAnsi("Indexando a tabela...") )
+
+	_cArqDBF  := CriaTrab(NIL,.f.)
+	_aStru    := { {"RECNO1" , "N" , 80 , 0 }, {"NIVEL","C",3,0}, {"NIVSD3","C",1,0} }
+	dbCreate( _cArqDBF , _aStru )
+	dbUseArea( .T. ,, _cArqDBF , "ADR_X" )
+	dbGoTop()
+
+	vmes    := strzero(month(mv_par01),2)
+	vano    := strzero(year(mv_par01),4)
+	vData   := ctod("01/"+vmes+"/"+vano)
+
+	DBSELECTAREA("TRB")
+	PROCREGUA(RECCOUNT())
+	DBGOTOP()
+	DBSEEK(_CFILIAL)
+	WHILE .NOT. EOF() .AND. TRB_FILIAL == _CFILIAL
+		INCPROC("Analisando Transferencias...")
+
+		IF TRB_FILIAL <> _CFILIAL
+			DBSKIP()
+			LOOP
+		ENDIF
+		cTipo:=Posicione("SB1",1,XFILIAL("SB1")+TRB_COD,"B1_TIPO")
+		cLocPad:=Posicione("SB1",1,XFILIAL("SB1")+TRB_COD,"B1_LOCPAD")
+		WRECNO:= RECNO()
+		IF TRB_CF $ "RE4/DE4"  .and. !(cTipo$"PI/SA" )                //MUDA SEQUENCIA PARA OS ITENS OBSOLTEOS QUE VAO PARA O 11
+			WRECNO:= RECNO()
+			IF TRB_LOCAL=="80"
+				DBSELECTAREA("ADR_X")
+				RECLOCK("ADR_X",.T.)
+				RECNO1 := WRECNO
+				NIVEL  := ""
+				NIVSD3 := "6"
+				MSUNLOCK()
+			ELSE
+				DBSELECTAREA("SD3")
+				DBSETORDER(4)
+				IF DBSEEK(xfilial("SD3")+TRB->TRB_SEQ+"E0"+TRB->TRB_COD)
+					IF SD3->D3_LOCAL=="80"
+						RECLOCK("ADR_X",.T.)
+						RECNO1 := WRECNO
+						NIVEL  := ""
+						NIVSD3 := "6"
+						MSUNLOCK()
+					ENDIF
+				ENDIF
+			ENDIF
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+		ENDIF
+		IF (TRB_CF $ "RE4/DE4" .and. cTipo$"PI/SA")
+			WRECNO:= RECNO()
+			WPROD:= TRB_COD
+			WLOCAL:= TRB_LOCAL
+			WALIAS:= TRB_ALIAS
+			WFILIAL:=TRB_FILIAL
+			WNUMSEQ:= TRB_SEQ
+
+			ltem:=.f.
+			cAliasTRB:= GetNextAlias()
+			BeginSql Alias cAliasTRB
+			SELECT TRB_NIVEL TNIVEL,TRB_NIVSD3 TNIVSD3
+			FROM TRB010AM TRB
+			WHERE TRB_FILIAL  = %Exp:WFILIAL% AND
+			TRB_COD = %Exp:TRB->TRB_COD% AND TRB_CF IN('RE2','RE1') AND TRB_ORDEM='300' AND //,'RE1'
+			TRB.%NotDel%
+			EndSql
+			dbSelectArea(cAliasTRB)
+			dbgotop()
+			While !(cAliasTRB)->(Eof())
+				DBSELECTAREA("SG1")
+				DBSETORDER(2)
+				DBSEEK(XFILIAL("SG1")+WPROD)
+				IF !EOF() .AND. WPROD==G1_COMP
+					tmptipo:=POSICIONE("SB1",1,XFILIAL("SB1")+SG1->G1_COD,"B1_TIPO")
+					IF tmptipo$"PI/SA"
+						WNIVEL :=STRZERO(VAL((cAliasTRB)->TNIVEL)-iif(TRB->TRB_CF=="RE1",1,2),2)
+						WNIVSD3:=STRZERO(VAL((cAliasTRB)->TNIVSD3)-iif(TRB->TRB_CF=="RE1",1,2),1)
+						LTEM:=.T.
+						EXIT
+					ENDIF
+				ENDIF
+				WNIVEL :=(cAliasTRB)->TNIVEL
+				WNIVSD3:=(cAliasTRB)->TNIVSD3
+				LTEM:=.T.
+				EXIT
+			END
+			dbSelectArea(cAliasTRB)
+			dbCloseArea()
+			IF LTEM
+				DBSELECTAREA("ADR_X")
+				RECLOCK("ADR_X",.T.)
+				RECNO1 := WRECNO
+				NIVEL  := WNIVEL
+				NIVSD3 := WNIVSD3
+				MSUNLOCK()
+			ENDIF
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+		endif
+		DBSELECTAREA("TRB")
+		DBSKIP()
+
+	end
+
+	DBSELECTAREA("ADR_X")
+	PROCREGUA(RECCOUNT())
+	DBGOTOP()
+	WHILE !EOF()
+		INCPROC("Atualizando  Transferencias Manuais...")
+		DBSELECTAREA("TRB")
+		DBGOTO(ADR_X->RECNO1)
+		if !eof()
+			RECLOCK("TRB",.F.)
+			TRB_NIVEL := ADR_X->NIVEL
+			TRB_NIVSD3:= ADR_X->NIVSD3
+			MSUNLOCK()
+		endif
+		DBSELECTAREA("ADR_X")
+		DBSKIP()
+	ENDDO
+
+	DBSELECTAREA("TRB")
+	PROCREGUA(RECCOUNT())
+	DBGOTOP()
+	DBSEEK(_CFILIAL)
+	WHILE .NOT. EOF() .AND. TRB_FILIAL == _CFILIAL
+
+		INCPROC("Analisando Devolucoes Manuais...")
+
+		IF TRB_FILIAL <> _CFILIAL
+			DBSKIP()
+			LOOP
+		ENDIF
+
+		IF TRB_CF=="DE0" .OR. TRB_CF=="RE0"    //.AND. TRB_DOC == "INVENT"    ACRESCENTADO RE6/DE6
+
+			B1est   :=   CalcEst(TRB_COD,TRB_LOCAL,vData)
+
+			if b1est[2] > 0  .and. TRB_SEQ <>'Z6YY17'   // comeca mes com custo, entao nao mexo na ordem
+				dbskip()
+				loop
+			endif
+
+			WRECNO:= RECNO()
+			WPROD:= TRB_COD
+			WLOCAL:= TRB_LOCAL
+			WALIAS:= TRB_ALIAS
+			WFILIAL:=TRB_FILIAL
+			WNUMSEQ:= TRB_SEQ
+			ltem:=.f.
+			WRECNO2:=RECNO()
+			LACHOU:=.F.
+
+			cAliasTRB:= GetNextAlias()
+			BeginSql Alias cAliasTRB
+			SELECT TRB_NIVEL TNIVEL,TRB_NIVSD3 TNIVSD3,TRB_CF TCF,TRB_RECNO TRECNO,TRB_SEQ
+			FROM TRB010AM TRB
+			WHERE TRB_FILIAL  = %Exp:WFILIAL% AND
+			TRB_COD = %Exp:TRB->TRB_COD%  AND TRB_LOCAL=%Exp:TRB->TRB_LOCAL%  AND TRB_CF IN ('DE4','DE6','PR0','PR1') AND TRB_ORDEM='300' AND
+			TRB.%NotDel%
+			ORDER BY TRB_CF,TRB_SEQ
+			EndSql
+			dbSelectArea(cAliasTRB)
+			dbgotop()
+			While !(cAliasTRB)->(Eof())
+
+				IF (cAliasTRB)->TCF == "DE6"
+					DBSELECTAREA("SD3")
+					DBGOTO((cAliasTRB)->TRECNO)
+					IF SD3->D3_QUANT == 0
+						(cAliasTRB)->(DBSKIP())
+						LOOP
+					ENDIF
+				ENDIF
+				IF (cAliasTRB)->TCF $ "DE4/DE6/PR0/PR1/"
+					WNIVEL:=(cAliasTRB)->TNIVEL
+					WNIVSD3:=(cAliasTRB)->TNIVSD3
+					LTEM:=.T.
+					EXIT
+				ENDIF
+				(cAliasTRB)->(DBSKIP())
+			Enddo
+			dbSelectArea(cAliasTRB)
+			dbCloseArea()
+			IF LTEM
+				DBSELECTAREA("ADR_X")
+				RECLOCK("ADR_X",.T.)
+				RECNO1 := WRECNO
+				NIVEL  := WNIVEL
+				NIVSD3 := SOMA1(WNIVSD3)
+				MSUNLOCK()
+			ENDIF
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+		endif
+		DBSKIP()
+
+	end
+
+	DBSELECTAREA("ADR_X")
+	PROCREGUA(RECCOUNT())
+	DBGOTOP()
+	WHILE !EOF()
+		INCPROC("Atualizando Devolucoes  Manuais...")
+		DBSELECTAREA("TRB")
+		DBGOTO(ADR_X->RECNO1)
+		if !eof()
+			RECLOCK("TRB",.F.)
+			TRB_NIVEL := ADR_X->NIVEL
+			TRB_NIVSD3 := ADR_X->NIVSD3
+			MSUNLOCK()
+		endif
+		DBSELECTAREA("ADR_X")
+		DBSKIP()
+	ENDDO
+
+	DBSELECTAREA("ADR_X")
+	DBCLOSEAREA("ADR_X")
+
+	DBSELECTAREA("TRB")
+	dbsetorder(2)
+	PROCREGUA(reccount())
+	DBGOTOP()
+	WHILE .NOT. EOF()
+
+		incproc("Atualizando Produçao de PIs e SAs...")
+
+		IF TRB_ORDEM <> "300"
+			DBSKIP()
+			LOOP
+		ENDIF
+
+		IF TRB_ALIAS <> "SD3"
+			DBSKIP()
+			LOOP
+		ENDIF
+
+		cTipo:=Posicione("SB1",1,XFILIAL("SB1")+TRB_COD,"B1_TIPO")
+		cLocPad:=Posicione("SB1",1,XFILIAL("SB1")+TRB_COD,"B1_LOCPAD")
+		//VERIFICA PRODUÇÕES DE RETRABALHO DE PA
+		/*
+		IF TRB_CF $ "PR0"  .AND. VAL(TRB_LOCAL)=14 .and. TRB_ALIAS == "SD3" .and. cTipo $ "PA"
+		WLOCAL:= TRB_LOCAL
+		WALIAS:= TRB_ALIAS
+		WNUMSEQ:= TRB_SEQ
+		WRECNO:= RECNO()
+		WCOD:= TRB_COD
+		lRet:=.F.
+		WFILIAL:=TRB_FILIAL
+		DBSELECTAREA("TRB")
+		DBSETORDER(2)
+		DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+		WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+		IF TRB->TRB_CF="RE1" .AND. TRB->TRB_COD==WCOD
+		cAliasTRB:= GetNextAlias()
+		BeginSql Alias cAliasTRB
+		SELECT isnull(MAX(R_E_C_N_O_),0) REGSEQ
+		FROM TRB010AM TRB
+		WHERE TRB_FILIAL  = %Exp:WFILIAL% AND
+		TRB_COD = %Exp:WCOD%  AND TRB_LOCAL=%Exp:WLOCAL%  AND TRB_CF IN ('DE4') AND TRB_ORDEM='300' AND
+		TRB.%NotDel%
+		EndSql
+		dbSelectArea(cAliasTRB)
+		dbgotop()
+		IF (cAliasTRB)->REGSEQ>0
+		lRet:=.T.
+		DBSELECTAREA("TRB")
+		DBGOTO((cAliasTRB)->REGSEQ)
+		WNIVEL:=TRB->TRB_NIVEL
+		WNIVSD3:=TRB->TRB_NIVSD3
+		DBSELECTAREA(cAliasTRB)
+		DBCLOSEAREA(cAliasTRB)
+		ENDIF
+		EXIT
+		ENDIF
+		TRB->(DBSKIP())
+		Enddo
+		DBSELECTAREA("TRB")
+		DBGOTO(WRECNO)
+		IF !lRet
+		TRB->(DBSKIP())
+		Loop
+		Endif
+		DBSELECTAREA("TRB")
+		DBSETORDER(2)
+		DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+		WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+		reclock("TRB",.F.)
+		TRB->TRB_NIVEL := WNIVEL
+		TRB->TRB_NIVSD3:= WNIVSD3
+		MSUNLOCK()
+		TRB->(DBSKIP())
+		Enddo
+		DBSELECTAREA("TRB")
+		DBGOTO(WRECNO)
+		Endif
+
+		IF TRB_CF $ "DE4"  .AND. VAL(TRB_LOCAL)==14 .and. TRB_ALIAS == "SD3" .and. cTipo $ "PA"
+		WALIAS:= TRB_ALIAS
+		WNUMSEQ:= TRB_SEQ
+		WRECNO:= RECNO()
+		WFILIAL:=TRB_FILIAL
+		DBSELECTAREA("TRB")
+		DBSETORDER(2)
+		DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+		WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+		reclock("TRB",.F.)
+		TRB->TRB_NIVEL := "99"
+		TRB->TRB_NIVSD3:= "3"
+		MSUNLOCK()
+		TRB->(DBSKIP())
+		Enddo
+		DBSELECTAREA("TRB")
+		DBGOTO(WRECNO)
+		ENDIF
+		*/
+		cString:="Z74NZ9/Z74N0Q/Z74N0S/Z74N0O"
+		IF (TRB->TRB_SEQ$cString)
+			WALIAS:= TRB_ALIAS
+			WNUMSEQ:= TRB_SEQ
+			WRECNO:= RECNO()
+			WFILIAL:=TRB_FILIAL
+			DBSELECTAREA("TRB")
+			DBSETORDER(2)
+			DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+			WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+				reclock("TRB",.F.)
+				TRB->TRB_NIVEL := "99"
+				TRB->TRB_NIVSD3:= "2"
+				MSUNLOCK()
+				TRB->(DBSKIP())
+			Enddo
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+		Endif
+		cString:="Z74412/Z7447Z/Z7440N/Z74481"
+		IF (TRB->TRB_CF="RE4" .AND. TRB->TRB_LOCAL='14' .AND. ALLTRIM(TRB->TRB_COD)=="ASS2186") .OR. (TRB->TRB_SEQ$cString)
+			WALIAS:= TRB_ALIAS
+			WNUMSEQ:= TRB_SEQ
+			WRECNO:= RECNO()
+			WFILIAL:=TRB_FILIAL
+			DBSELECTAREA("TRB")
+			DBSETORDER(2)
+			DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+			WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+				reclock("TRB",.F.)
+				TRB->TRB_NIVEL := "99"
+				TRB->TRB_NIVSD3:= "6"
+				MSUNLOCK()
+				TRB->(DBSKIP())
+			Enddo
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+		Endif
+		cString:="Z744E4/Z7489T"
+		IF (TRB->TRB_SEQ$cString)
+			WALIAS:= TRB_ALIAS
+			WNUMSEQ:= TRB_SEQ
+			WRECNO:= RECNO()
+			WFILIAL:=TRB_FILIAL
+			DBSELECTAREA("TRB")
+			DBSETORDER(2)
+			DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+			WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+				reclock("TRB",.F.)
+				TRB->TRB_NIVEL := ""
+				TRB->TRB_NIVSD3:= "6"
+				MSUNLOCK()
+				TRB->(DBSKIP())
+			Enddo
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+		Endif
+
+		cString:="Z74JFN/Z74JFN/Z74KZ6/Z74KZ6/Z74O6I/Z74O6I/Z74Q1F/Z74Q1F/Z74QII/Z74RIN/Z74UHF/Z74W60/Z74X4H"
+		cString+='Z75AMF/Z75ANC/Z75ANQ"
+		IF (TRB->TRB_SEQ$cString)
+			WALIAS:= TRB_ALIAS
+			WNUMSEQ:= TRB_SEQ
+			WRECNO:= RECNO()
+			WFILIAL:=TRB_FILIAL
+			DBSELECTAREA("TRB")
+			DBSETORDER(2)
+			DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+			WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+				reclock("TRB",.F.)
+				TRB->TRB_NIVEL := "99"
+				TRB->TRB_NIVSD3:= "3"
+				MSUNLOCK()
+				TRB->(DBSKIP())
+			Enddo
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+		Endif
+
+		IF TRB_CF $ "DE6"  .AND. VAL(TRB_LOCAL)==01 .and. TRB_ALIAS == "SD3" .and. cTipo $ "PA"
+			WALIAS:= TRB_ALIAS
+			WNUMSEQ:= TRB_SEQ
+			WRECNO:= RECNO()
+			WFILIAL:=TRB_FILIAL
+			DBSELECTAREA("TRB")
+			DBSETORDER(2)
+			DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+			WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+				reclock("TRB",.F.)
+				TRB->TRB_NIVEL := ""
+				TRB->TRB_NIVSD3:= "1"
+				MSUNLOCK()
+				TRB->(DBSKIP())
+			Enddo
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+		ENDIF
+		
+		IF TRB_SEQ$('Z744E4/Z7489T')
+			reclock("TRB",.F.)
+			TRB->TRB_NIVEL := ""
+			TRB->TRB_NIVSD3:= "1"
+			MSUNLOCK()
+		ENDIF
+		
+		//UTILIZADO PARA CORREÇÃO DE SEQUENCIA NO CASO DE NAO HAVER PRODUCAO DE PI´S NO MES (CASO OCORRIDO PARA ITENS INDUSTRIALIZADOS POR TERCEIROS)
+		IF TRB_CF $ "DE4"  .AND. TRB_LOCAL$"20/14" .and. TRB_ALIAS == "SD3" .and. cTipo $ "PI/SA"
+			WLOCAL:= TRB_LOCAL
+			WALIAS:= TRB_ALIAS
+			WNUMSEQ:= TRB_SEQ
+			WRECNO:= RECNO()
+			WFILIAL:=TRB_FILIAL
+			WNIVEL:=TRB_NIVEL
+			WNIVSD3:=TRB_NIVSD3
+			LACHOU:=.F.
+			cAliasTRB:= GetNextAlias()
+			BeginSql Alias cAliasTRB
+			SELECT TRB_NIVEL TNIVEL,TRB_NIVSD3 TNIVSD3,TRB_CF TCF,TRB_RECNO TRECNO,TRB_OP TPOP,TRB_SEQ TSEQ
+			FROM TRB010AM TRB
+			WHERE TRB_FILIAL  = %Exp:WFILIAL% AND
+			TRB_COD = %Exp:TRB->TRB_COD%  AND TRB_LOCAL IN ('14','20')  AND TRB_CF IN ('PR0','PR1') AND TRB_ORDEM='300' AND
+			TRB.%NotDel%
+			ORDER BY TRB_CF
+			EndSql
+			dbSelectArea(cAliasTRB)
+			dbgotop()
+			if  (cAliasTRB)->(Eof())
+				DBSELECTAREA("TRB")
+				DBSETORDER(2)
+				DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+				WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+					reclock("TRB",.F.)
+					TRB->TRB_NIVEL := "90"
+					TRB->TRB_NIVSD3:= "1"
+					MSUNLOCK()
+					TRB->(DBSKIP())
+				Enddo
+			Endif
+			DBSELECTAREA(cAliasTRB)
+			DBCLOSEAREA(cAliasTRB)
+
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+
+		Endif
+
+		IF TRB_CF $ "RE2/RE1"  .AND. TRB_ORDEM == "300" .and. TRB_ALIAS == "SD3" .and. cTipo $ "PI/SA"
+			WRECNO:= RECNO()
+			WPROD:= TRB_COD
+			WLOCAL:= TRB_LOCAL
+			WALIAS:= TRB_ALIAS
+			WFILIAL:=TRB_FILIAL
+			WNUMSEQ:= TRB_SEQ
+			WNIVEL:=TRB_NIVEL
+			WNIVSD3:=TRB_NIVSD3
+			WOP:= TRB_OP
+			ltem:=.f.
+			WRECNO2:=RECNO()
+			LACHOU:=.F.
+
+			AliasTRB:= GetNextAlias()
+			BeginSql Alias cAliasTRB
+			SELECT TRB_NIVEL TNIVEL,TRB_NIVSD3 TNIVSD3,TRB_CF TCF,TRB_RECNO TRECNO,TRB_OP TPOP,TRB_SEQ TSEQ
+			FROM TRB010AM TRB
+			WHERE TRB_FILIAL  = %Exp:WFILIAL% AND
+			TRB_COD = %Exp:TRB->TRB_COD%  AND TRB_LOCAL IN ('14','20')  AND TRB_CF IN ('PR0','PR1') AND TRB_ORDEM='300' AND
+			TRB.%NotDel%
+			ORDER BY TRB_CF
+			EndSql
+			dbSelectArea(cAliasTRB)
+			dbgotop()
+			While !(cAliasTRB)->(Eof())
+				WOP    := (cAliasTRB)->TPOP
+				WNUMSEQ:= (cAliasTRB)->TSEQ
+				LTEM:=.T.
+				DBSELECTAREA("TRB")
+				DBSETORDER(2)
+				DBSEEK(WFILIAL+WALIAS+WNUMSEQ)
+				WHILE .NOT. EOF() .AND. WFILIAL+WALIAS+WNUMSEQ == TRB->TRB_FILIAL+TRB->TRB_ALIAS+TRB->TRB_SEQ
+					IF TRB->TRB_OP == WOP
+						reclock("TRB",.F.)
+						TRB->TRB_NIVEL:= STRZERO(VAL(WNIVEL) -1,2)
+						TRB->TRB_NIVSD3:=STRZERO(VAL(WNIVSD3)-1,1)
+						MSUNLOCK()
+					ENDIF
+					TRB->(DBSKIP())
+				END
+				DBSELECTAREA(cAliasTRB)
+				(cAliasTRB)->(DBSKIP())
+			END
+			DBSELECTAREA(cAliasTRB)
+			DBCLOSEAREA(cAliasTRB)
+
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO)
+		ENDIF
+		NSEQS:="Z742XK/Z74EQO"
+		If TRB->TRB_SEQ$(NSEQS)
+			reclock("TRB",.F.)
+			TRB->TRB_NIVEL:=""
+			TRB->TRB_NIVSD3:="8"
+			MSUNLOCK()
+		Endif
+		If TRB->TRB_SEQ$("Z75C0Q")
+			reclock("TRB",.F.)
+			TRB->TRB_NIVEL:=""
+			TRB->TRB_NIVSD3:="1"
+			MSUNLOCK()
+		Endif
+		
+		If alltrim(TRB->TRB_SEQ)$"Z758TG"
+			reclock("TRB",.F.)
+			TRB->TRB_NIVEL:="98"
+			TRB->TRB_NIVSD3:="3"
+			MSUNLOCK()
+		Endif
+		If alltrim(TRB->TRB_SEQ)$"Z749WE"
+			reclock("TRB",.F.)
+			TRB->TRB_NIVEL:="97"
+			TRB->TRB_NIVSD3:="4"
+			MSUNLOCK()
+		Endif
+		DBSELECTAREA("TRB")
+		DBSKIP()
+	END
+
+	//ATUALIZANDO OS SCRAPS
+	DBSELECTAREA("TRB")
+	dbsetorder(2)
+	PROCREGUA(reccount())
+	DBGOTOP()
+	WHILE .NOT. EOF()
+		incproc("Atualizando os Scraps...")
+		cTipo:=Posicione("SB1",1,XFILIAL("SB1")+TRB_COD,"B1_TIPO")
+		IF TRB->TRB_CF $ "RE1"  .AND. TRB->TRB_ORDEM == "300" .and. TRB->TRB_ALIAS == "SD3" .and. cTipo<>"PA"
+			WRECNO2:=TRB->(RECNO())
+			WFILIAL:=TRB->TRB_FILIAL
+			cAliasTRB:= GetNextAlias()
+			BeginSql Alias cAliasTRB
+			SELECT TRB_NIVEL,TRB_NIVSD3,MAX(R_E_C_N_O_) TSEQ
+			FROM TRB010AM TRB
+			WHERE TRB_FILIAL  = %Exp:WFILIAL% AND
+			TRB_COD = %Exp:TRB->TRB_COD%  AND TRB_LOCAL IN ('14','20')  AND TRB_CF IN ('RE2') AND TRB_ORDEM='300' AND
+			TRB_OP=%Exp:TRB->TRB_OP%  AND	TRB.%NotDel%
+			GROUP BY TRB_NIVEL,TRB_NIVSD3
+			EndSql
+			dbSelectArea(cAliasTRB)
+			dbgotop()
+			IF !EOF()
+				WRECNO :=(cAliasTRB)->TSEQ
+				WNIVEL :=(cAliasTRB)->TRB_NIVEL
+				WNIVSD3:=(cAliasTRB)->TRB_NIVSD3
+				DBSELECTAREA("TRB")
+				DBGOTO(WRECNO2)
+				reclock("TRB",.F.)
+				TRB->TRB_NIVEL :=WNIVEL
+				TRB->TRB_NIVSD3:=WNIVSD3
+				MSUNLOCK()
+			ENDIF
+			DBSELECTAREA(cAliasTRB)
+			DBCLOSEAREA(cAliasTRB)
+			DBSELECTAREA("TRB")
+			DBGOTO(WRECNO2)
+		ENDIF
+		DBSELECTAREA("TRB")
+		DBSKIP()
+	Enddo
+
+	cQuery := " DROP TABLE TRB010AM "
+	nErro := TCSQLExec(cQuery)
+	If nErro > 0
+		msgstop("Nao foi possivel realizar a limpeza da tabela! Chame o Administrador! ","Erro ...")
+	Endif
+	DBSELECTAREA("TRB")
+	COPY TO TRB010AM VIA  "TOPCONN
+
+	dbselectarea("TRB")
+	DBSETORDER(1)
+	DBGOTOP()
+
+	restarea(warea)
+
+RETURN

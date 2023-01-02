@@ -1,0 +1,907 @@
+#INCLUDE "Protheus.ch"
+#INCLUDE "TopConn.ch"
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ MATR790  ³ Autor ³ Marco Bianchi         ³ Data ³ 21/07/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Romaneio de Despacho  (Expedicao) - Release 4.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ SIGAFAT                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+User Function uMATR790()
+
+Local oReport
+
+//If FindFunction("TRepInUse") .AND. TRepInUse()
+	//-- Interface de impressao
+	oReport := ReportDef()
+	oReport:PrintDialog()
+//Else
+//	u_MATR790R3()
+//EndIf
+
+/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+  ³           Verifica se o Grupo de Perguntas existe ou nao                   ³
+  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+
+VldPerg( "UMTR7901  " )
+
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³ Marco Bianchi         ³ Data ³ 21/07/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatório                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local oReport
+Local dEmissao	:= dDatabase
+Local nTotLib	:= 0
+Local nTamData	:= Len(DTOC(MsDate()))
+
+#IFDEF TOP
+	Local cAliasSC9 := cAliasSC5 := cAliasSF2 := cALiasSB1 := cAliasSA1 := cALiasSC6 := GetNextAlias()
+#ELSE 
+	Local cALiasSC9 := "SC9"
+	Local cALiasSC5 := "SC5"
+	Local cALiasSC6 := "SC6"
+	Local cALiasSF2 := "SF2"
+	Local cALiasSB1 := "SB1"
+	Local cALiasSA1 := "SA1"
+#ENDIF	
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport := TReport():New("UMATR790","Romaneio de Despacho  (Expedicao)","UMTR7901  ", {|oReport| ReportPrint(oReport,cAliasSC9,cAliasSC5,cAliasSF2,cALiasSB1,cAliasSA1,cAliasSC6)},"Emissao do Romaneio de Despacho para a Expedicao, Armazem atraves de intervalo de Pedidos informado na opçäo Parâmetros.")
+//oReport:SetPortrait() 
+oReport:SetLandScape()
+oReport:SetTotalInLine(.F.)
+
+Pergunte(oReport:uParam,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da seçao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a seção.                   ³
+//³ExpA4 : Array com as Ordens do relatório                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da celulas da secao do relatorio                                ³
+//³                                                                        ³
+//³TRCell():New                                                            ³
+//³ExpO1 : Objeto TSection que a secao pertence                            ³
+//³ExpC2 : Nome da celula do relatório. O SX3 será consultado              ³
+//³ExpC3 : Nome da tabela de referencia da celula                          ³
+//³ExpC4 : Titulo da celula                                                ³
+//³        Default : X3Titulo()                                            ³
+//³ExpC5 : Picture                                                         ³
+//³        Default : X3_PICTURE                                            ³
+//³ExpC6 : Tamanho                                                         ³
+//³        Default : X3_TAMANHO                                            ³
+//³ExpL7 : Informe se o tamanho esta em pixel                              ³
+//³        Default : False                                                 ³
+//³ExpB8 : Bloco de código para impressao.                                 ³
+//³        Default : ExpC2                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Secao 1 - Cabecalho do Pedido                                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oCabec := TRSection():New(oReport,"Cabecalho",{"SC5","SF2","SA1","SA4"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+oCabec:SetLineStyle(.T.)
+TRCell():New(oCabec,"C5_NUM"		,/*Tabela*/	,RetTitle("C5_NUM"		),PesqPict("SC5","C5_NUM"		),TamSx3("C5_NUM"	   	)[1],/*lPixel*/,{|| (cAliasSC5)->C5_NUM		})
+TRCell():New(oCabec,"C5_EMISSAO"	,/*Tabela*/	,RetTitle("C5_EMISSAO"	),PesqPict("SC5","C5_EMISSAO"	),nTamData                  ,/*lPixel*/,{|| (cAliasSC5)->C5_EMISSAO	})
+TRCell():New(oCabec,"C5_CLIENTE"	,/*Tabela*/	,RetTitle("C5_CLIENTE"	),PesqPict("SC5","C5_CLIENTE"	),TamSx3("C5_CLIENTE"	)[1],/*lPixel*/,{|| (cAliasSC5)->C5_CLIENTE	})
+TRCell():New(oCabec,"C5_LOJACLI"	,/*Tabela*/	,RetTitle("C5_LOJACLI"	),PesqPict("SC5","C5_LOJACLI"	),TamSx3("C5_LOJACLI"	)[1],/*lPixel*/,{|| (cAliasSC5)->C5_LOJACLI	})
+TRCell():New(oCabec,"A1_NOME"		,/*Tabela*/	,RetTitle("A1_NOME"		),PesqPict("SA1","A1_NOME"		),TamSx3("A1_NOME"		)[1],/*lPixel*/,{|| (cAliasSA1)->A1_NOME		})
+TRCell():New(oCabec,"A1_END"		,/*Tabela*/	,RetTitle("A1_END"		),PesqPict("SA1","A1_END"		),TamSx3("A1_END"	   	)[1],/*lPixel*/,{|| (cAliasSA1)->A1_END		})
+TRCell():New(oCabec,"A1_BAIRRO"	,/*Tabela*/	,RetTitle("A1_BAIRRO"	),PesqPict("SA1","A1_BAIRRO"	),TamSx3("A1_BAIRRO" 	)[1],/*lPixel*/,{|| (cAliasSA1)->A1_BAIRRO	})
+TRCell():New(oCabec,"A1_MUN"		,/*Tabela*/	,RetTitle("A1_MUN"		),PesqPict("SA1","A1_MUN"		),TamSx3("A1_MUN"	   	)[1],/*lPixel*/,{|| (cAliasSA1)->A1_MUN		})
+TRCell():New(oCabec,"A1_EST"		,/*Tabela*/	,RetTitle("A1_EST"		),PesqPict("SA1","A1_EST"		),TamSx3("A1_EST"	   	)[1],/*lPixel*/,{|| (cAliasSA1)->A1_EST		})
+TRCell():New(oCabec,"C5_TRANSP"	,/*Tabela*/	,RetTitle("C5_TRANSP"	),PesqPict("SC5","C5_TRANSP"	),TamSx3("C5_TRANSP" 	)[1],/*lPixel*/,{|| (cAliasSC5)->C5_TRANSP	})
+TRCell():New(oCabec,"A4_NOME"		,"SA4"		,RetTitle("A4_NOME"		),PesqPict("SA4","A4_NOME"		),TamSx3("A4_NOME"		)[1],/*lPixel*/,{|| SA4->A4_NOME				   })
+
+//If SA4->(FieldPos("A4_NREDUZ"))<>0
+//	TRCell():New(oCabec,"A4_NREDUZ"		,"SA4"		,RetTitle("A4_NREDUZ"	),PesqPict("SA4","A4_NREDUZ"	),TamSx3("A4_NREDUZ"	)[1],/*lPixel*/,{|| SA4->A4_NREDUZ			})
+//EndIf
+
+TRCell():New(oCabec,"A4_VIA"		,"SA4"		,RetTitle("A4_VIA"		),PesqPict("SA4","A4_VIA"		),TamSx3("A4_VIA"		)[1],/*lPixel*/,{|| SA4->A4_VIA				})
+TRCell():New(oCabec,"A4_END"		,"SA4"		,RetTitle("A4_END"		),PesqPict("SA4","A4_END"		),TamSx3("A4_END"		)[1],/*lPixel*/,{|| SA4->A4_END				})
+TRCell():New(oCabec,"A4_MUN"		,"SA4"		,RetTitle("A4_MUN"		),PesqPict("SA4","A4_MUN"		),TamSx3("A4_MUN"		)[1],/*lPixel*/,{|| SA4->A4_MUN				})
+TRCell():New(oCabec,"A4_EST"		,"SA4"		,RetTitle("A4_EST"		),PesqPict("SA4","A4_EST"		),TamSx3("A4_MUN"		)[1],/*lPixel*/,{|| SA4->A4_EST				})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Secao 2 - Itens                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oRomaneio := TRSection():New(oReport,"Itens",{"SC9","SC6","SB1"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+oRomaneio:SetTotalInLine(.F.)
+TRCell():New(oRomaneio,"C9_PRODUTO"	,/*Tabela*/,RetTitle("C9_PRODUTO"),PesqPict("SC9","C9_PRODUTO"	),TamSx3("C9_PRODUTO")[1],/*lPixel*/,{|| (cAliasSC9)->C9_PRODUTO													})
+//TRCell():New(oRomaneio,"C6_DESCRI",/*Tabela*/,RetTitle("C6_DESCRI"	),PesqPict("SC6","C6_DESCRI"	),TamSx3("C6_DESCRI"	)[1],/*lPixel*/,{|| (cAliasSC6)->C6_DESCRI													})
+TRCell():New(oRomaneio,"B1_XDESCNF"	,/*Tabela*/,RetTitle("B1_XDESCNF"),PesqPict("SB1","B1_XDESCNF"	),TamSx3("B1_XDESCNF")[1],/*lPixel*/,{|| (cAliasSB1)->B1_XDESCNF 													},,,"RIGHT")
+TRCell():New(oRomaneio,"C6_UM"		,/*Tabela*/,RetTitle("C6_UM"		),PesqPict("SC6","C6_UM"		),TamSx3("C6_UM"		)[1],/*lPixel*/,{|| (cAliasSC6)->C6_UM															})
+TRCell():New(oRomaneio,"NTOTLIB"		,/*Tabela*/,RetTitle("C9_QTDLIB"	),PesqPict("SC9","C9_QTDLIB"	),TamSx3("C9_QTDLIB"	)[1],/*lPixel*/,{|| nTotLib																		},,,"RIGHT")
+TRCell():New(oRomaneio,"C9_PRCVEN"	,/*Tabela*/,RetTitle("C9_PRCVEN"	),PesqPict("SC9","C9_PRCVEN"	),TamSx3("C9_PRCVEN"	)[1],/*lPixel*/,{|| xMoeda((cALiasSC9)->C9_PRCVEN,1,mv_par07,(cALiasSC5)->C5_EMISSAO) 		},,,"RIGHT")
+TRCell():New(oRomaneio,"B1_IPI"		,/*Tabela*/,RetTitle("B1_IPI"		),PesqPict("SB1","B1_IPI"		),TamSx3("B1_IPI"		)[1],/*lPixel*/,{|| (cAliasSB1)->B1_IPI 														},,,"RIGHT")
+If cPaisloc=="BRA" 
+	TRCell():New(oRomaneio,"NALIQ",/*Tabela*/,RetTitle("B1_PICM"),PesqPict("SB1","B1_PICM"),TamSx3("B1_PICM")[1],/*lPixel*/,{|| IIf( !Empty((cAliasSB1)->B1_PICM),(cAliasSB1)->B1_PICM,(cAliasSB1)->B1_ALIQISS ) 			},,,"RIGHT")
+EndIf
+TRCell():New(oRomaneio,"NTOTAL"		,/*Tabela*/,RetTitle("C6_VALOR"		),PesqPict("SC6","C6_VALOR"		),TamSx3("C6_VALOR"		)[1],/*lPixel*/,{|| xMoeda(((IIF((cALiasSC6)->C6_GRADE=="S" .AND. MV_PAR06 ==1,nTotLib,(cALiasSC9)->C9_QTDLIB))*(cAliasSC9)->C9_PRCVEN),1,mv_par07,(cAliasSC5)->C5_EMISSAO)},,,"RIGHT")
+TRCell():New(oRomaneio,"DEMISSAO"	,/*Tabela*/,RetTitle("F2_EMISSAO"	),PesqPict("SF2","F2_EMISSAO"	),nTamData					,/*lPixel*/,{|| dEmissao					})
+TRCell():New(oRomaneio,"C6_LOCAL"	,/*Tabela*/,RetTitle("C6_LOCAL"		),PesqPict("SC6","C6_LOCAL"		),TamSx3("C6_LOCAL"		)[1],/*lPixel*/,{|| (cAliasSC6)->C6_LOCAL		})
+TRCell():New(oRomaneio,"C6_LOCALIZ"	,/*Tabela*/,RetTitle("C6_LOCALIZ"	),PesqPict("SC6","C6_LOCALIZ"	),TamSx3("C6_LOCALIZ"	)[1],/*lPixel*/,{|| (cAliasSC6)->C6_LOCALIZ	})
+TRCell():New(oRomaneio,"C9_NFISCAL"	,/*Tabela*/,RetTitle("C9_NFISCAL"	),PesqPict("SC9","C9_NFISCAL"	),TamSx3("C9_NFISCAL"	)[1],/*lPixel*/,{|| (cAliasSC9)->C9_NFISCAL	})
+TRCell():New(oRomaneio,"C9_SERIENF"	,/*Tabela*/,RetTitle("C9_SERIENF"	),PesqPict("SC9","C9_SERIENF"	),TamSx3("C9_SERIENF"	)[1],/*lPixel*/,{|| (cAliasSC9)->C9_SERIENF	})
+
+TRFunction():New(oRomaneio:Cell("NTOTLIB"	),/* cID */,"SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+TRFunction():New(oRomaneio:Cell("NTOTAL"	),/* cID */,"SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Altera texto dos totalizadores                                         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:Section(2):SetTotalText(" T O T A I S ")
+
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³ Marco Bianchi         ³ Data ³ 21/07/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                           ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasSC9,cAliasSC5,cAliasSF2,cALiasSB1,cAliasSA1,cAliasSC6)
+
+Local lFirst  := .T.
+Local cPedAnt := "   "
+Local cFilSC5 := ""
+Local cFilSF2 := ""
+Local cFilSA1 := ""
+Local cFilSA4 := ""
+
+#IFNDEF TOP
+	Local cCondicao := ""
+#ENDIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define o bloco de codigo que retornara o conteudo de impres- 		   ³
+//³ sao da celula.                                               		   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:Section(2):Cell("DEMISSAO"):SetBlock({|| dEmissao })
+oReport:Section(2):Cell("NTOTLIB" ):SetBlock({|| nTotLib  })
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Transforma parametros Range em expressao SQL                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+MakeSqlExpr(oReport:uParam)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtragem do relatório                                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SC9")		// Pedidos Liberados
+dbSetOrder(1)			// Pedido,Item,Sequencia,Produto
+#IFDEF TOP
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Query do relatório da secao 1                                           ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:Section(2):BeginQuery()	
+	BeginSql Alias cAliasSC9
+	SELECT C9_PRODUTO,C9_QTDLIB,C9_PRCVEN,C9_NFISCAL,C9_SERIENF,C9_FILIAL,C9_BLEST,C9_BLCRED,C9_PEDIDO,
+		C9_CLIENTE,C9_LOJA,C9_ITEM,C9_SEQUEN,C5_FILIAL,C5_EMISSAO,C5_NUM,C5_TIPO,C5_TRANSP,C5_CLIENTE,
+		C5_LOJACLI,B1_IPI,B1_PICM,B1_COD,B1_DESC,B1_XDESCNF,B1_ALIQISS,A1_COD,A1_LOJA,A1_NOME,A1_END,A1_BAIRRO,A1_MUN,A1_EST,
+		C6_DESCRI,C6_UM,C6_VALOR,C6_LOCAL,C6_LOCALIZ,C6_FILIAL,C6_NUM,C6_PRODUTO,C6_ITEM,C6_GRADE,
+		F2_EMISSAO,F2_FILIAL,F2_DOC,F2_SERIE,F2_CLIENTE,F2_LOJA
+	FROM %Table:SC5% SC5,%Table:SF2% SF2,%Table:SC6% SC6, %Table:SC9% SC9
+	LEFT JOIN %Table:SB1% SB1
+		ON B1_COD = C9_PRODUTO AND
+		SB1.B1_FILIAL = %xFilial:SB1% AND 
+		SB1.%NotDel%
+	LEFT JOIN %Table:SA1% SA1
+		ON A1_COD = C9_CLIENTE AND 
+		A1_LOJA = C9_LOJA AND
+		SA1.A1_FILIAL = %xFilial:SA1% AND 
+		SA1.%NotDel%		
+	WHERE C9_FILIAL = %xFilial:SC9% AND 
+		C9_PEDIDO >= %Exp:mv_par01% AND C9_PEDIDO <= %Exp:mv_par02% AND
+		(C9_BLEST = " " OR C9_BLEST = "10") AND
+		(C9_BLCRED = " " OR C9_BLCRED = "10") AND
+		SC9.%NotDel% AND 
+		C5_FILIAL = %xFilial:SC5% AND 
+		C5_NUM = C9_PEDIDO AND NOT(C5_TIPO IN ("D","B")) AND
+		SC5.%NotDel% AND
+		C6_FILIAL = %xFilial:SC6% AND 
+		C6_NUM = C9_PEDIDO AND C6_PRODUTO = C9_PRODUTO AND C6_ITEM = C9_ITEM AND
+		SC6.%NotDel% AND
+		F2_FILIAL = %xFilial:SF2% AND 
+		F2_DOC = C9_NFISCAL AND F2_SERIE = C9_SERIENF AND F2_CLIENTE = C9_CLIENTE AND F2_LOJA = C9_LOJA AND
+		F2_EMISSAO >= %Exp:DtoS(mv_par03)% AND F2_EMISSAO <= %Exp:DtoS(mv_par04)% AND
+		F2_DOC     >= %Exp:mv_par09% AND F2_DOC     <= %Exp:mv_par10% AND		
+		F2_SERIE     >= %Exp:mv_par11% AND F2_SERIE     <= %Exp:mv_par12% AND		
+		SF2.%NotDel%
+	ORDER BY C9_PEDIDO,C9_ITEM,C9_SEQUEN,C9_PRODUTO
+	EndSql 
+	oReport:Section(2):EndQuery(/*Array com os parametros do tipo Range*/)
+		
+#ELSE
+	cCondicao := 'C9_FILIAL == "'+xFilial("SC9")+'" ' 
+	cCondicao += " .AND. NOT(!Empty(C9_BLEST) .AND. C9_BLEST <> '10')"
+	cCondicao += " .AND. NOT(!Empty(C9_BLCRED) .AND. C9_BLCRED <> '10') "
+	oReport:Section(2):SetFilter(cCondicao,IndexKey())
+#ENDIF		
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtros do usuario                                                      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If len(oReport:Section(1):GetAdvplExp("SC5")) > 0
+	cFilSC5 := oReport:Section(1):GetAdvplExp("SC5")
+EndIf
+If len(oReport:Section(1):GetAdvplExp("SF2")) > 0
+	cFilSF2 := oReport:Section(1):GetAdvplExp("SF2")
+EndIf
+If len(oReport:Section(1):GetAdvplExp("SA1")) > 0
+	cFilSA1 := oReport:Section(1):GetAdvplExp("SA1")
+EndIf
+If len(oReport:Section(1):GetAdvplExp("SA4")) > 0
+	cFilSA4 := oReport:Section(1):GetAdvplExp("SA4")
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Inicio da impressao do fluxo do relatório                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:SetTitle(oReport:Title() + " - " + GetMv("MV_MOEDA" + STR(mv_par07,1)) )	// "Curva ABC de Estoque - Ordem de "###" / % de Participacao"
+oReport:SetMeter((cAliasSC9)->(LastRec()))
+While !oReport:Cancel() .AND. !(cAliasSC9)->(Eof()) .AND. (cAliasSC9)->C9_FILIAL = xFilial("SC9")
+
+	dbSelectArea("SC5")
+	dbSetOrder(1)
+	dbSeek(xFilial()+(cALiasSC9)->C9_PEDIDO)
+	
+	dbSelectArea("SF2")
+	dbSetOrder(1)
+	MsSeek(xFilial("SF2")+(cAliasSC9)->C9_NFISCAL+(cAliasSC9)->C9_SERIENF+(cAliasSC9)->C9_CLIENTE+(cAliasSC9)->C9_LOJA)
+
+	#IFNDEF TOP
+	
+		If At((cALiasSC5)->C5_TIPO,"DB") != 0 
+			dbSelectArea(cAliasSC9)
+			dbSkip()
+			Loop
+		EndIf
+	
+		dbSelectArea(cAliasSC6)
+		dbSetOrder(1)
+		dbSeek(xFilial()+(cAliasSC9)->C9_PEDIDO+(cAliasSC9)->C9_ITEM)
+		
+		If (cAliasSF2)->F2_EMISSAO < MV_PAR03 .OR. (cAliasSF2)->F2_EMISSAO > MV_PAR04
+			dbSelectArea(cAliasSC9)
+			dbSkip()
+			Loop
+		Endif
+	#ENDIF	
+	dEmissao := (cAliasSF2)->F2_EMISSAO
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Valida o produto conforme a mascara         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea(cAliasSC9)
+	lRet:=ValidMasc(SC9->C9_PRODUTO,MV_PAR05)
+	If !lRet
+		dbSelectArea(cAliasSC9)
+		dbSkip()
+		Loop
+	Endif
+	
+	If C9_PEDIDO # cPedAnt .OR. lFirst
+		cPedAnt:= C9_PEDIDO
+		cPedido:= (cAliasSC5)->C5_NUM
+		
+		dbSelectArea("SA4")
+		dbSeek(xFilial()+(cAliasSC5)->C5_TRANSP)
+		
+		dbSelectArea("SA1")
+		dbSeek(xFilial()+(cAliasSC5)->C5_CLIENTE+(cAliasSC5)->C5_LOJACLI)
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Verifica filtro de usuario                  ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		dbSelectArea("SF2")
+		If !Empty(cFilSF2) .AND. !(&cFilSF2)
+			dbSelectArea(cAliasSC9)
+		   	dbSkip()
+		   Loop
+		EndIf	
+
+		dbSelectArea("SC5")	
+		If !Empty(cFilSC5) .AND. !(&cFilSC5)
+			dbSelectArea(cAliasSC9)
+		   	dbSkip()
+		   Loop
+		EndIf	
+
+		dbSelectArea("SA1")
+		If !Empty(cFilSA1) .AND. !(&cFilSA1)
+			dbSelectArea(cAliasSC9)
+		   	dbSkip()
+		   Loop
+		EndIf	
+
+		dbSelectArea("SA4")
+		If !Empty(cFilSA4) .AND. !(&cFilSA4)
+			dbSelectArea(cAliasSC9)
+		   	dbSkip()
+		   Loop
+		EndIf	
+		
+		If lfirst
+		  oReport:EndPage() //-- Salta Pagina
+		EndIf	
+		
+		lFirst := .F.
+
+        oReport:Section(1):Init()
+        oReport:Section(1):PrintLine()
+        oReport:Section(1):Finish()
+
+		oReport:Section(2):Init()
+		
+	Endif
+
+	ImpItemR4(oReport,cAliasSC9,cAliasSC6,cAliasSB1)
+	
+	dbSelectArea(cAliasSC9)
+	dbSkip()
+	oReport:IncMeter()
+	
+	If C9_PEDIDO # cPedAnt .OR. Eof()
+		oReport:Section(2):Finish()
+		oReport:SkipLine(1)
+
+		// Um Pedido por Folha
+		If mv_par08 == 1
+           oReport:Section(1):SetPageBreak(.T.)		
+		EndIf
+	EndIf
+EndDo 
+oReport:Section(2):SetPageBreak(.T.)
+	
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ImpItemR4 ³ Autor ³ Marco Bianchi         ³ Data ³ 24/07/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Impressao de Itens do Romaneio  de Despacho                ³±±
+±±³          ³ Ordem de Impressao : LOCALIZACAO NO ALMOXARIFADO           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ ImpItem(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MatR790                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ImpItemR4(oReport,cAliasSC9,cAliasSC6,cAliasSB1)
+
+Local cMascara :=GetMv("MV_MASCGRD")
+Local nTamRef  :=Val(Substr(cMascara,1,2))
+
+nTotLib := (cAliasSC9)->C9_QTDLIB
+#IFNDEF TOP
+	dbSelectArea(cAliasSC6)
+	dbSeek(xFilial()+(cAliasSC9)->C9_PEDIDO+(cAliasSC9)->C9_ITEM)
+	dbSelectArea(cAliasSB1)
+	dbSeek(xFilial()+(cAliasSC6)->C6_PRODUTO+(cAliasSC6)->C6_LOCAL)
+#ENDIF	
+
+IF (cAliasSC6)->C6_GRADE == "S" .AND. MV_PAR06 == 1
+	dbSelectArea(cAliasSC9)
+	cProdRef:=Substr(C9_PRODUTO,1,nTamRef)
+	cPedido := (cAliasSC9)->C9_PEDIDO
+	nReg    := 0
+	nTotLib := 0
+	
+	While !oReport:Cancel() .AND. !Eof() .AND. xFilial() == C9_FILIAL .AND. Substr(C9_PRODUTO,1,nTamRef) == cProdRef;
+		.AND. C9_PEDIDO == cPedido
+		nReg:=Recno()
+		
+		#IFNDEF TOP
+			If !Empty(C9_BLEST) .AND. !Empty(C9_BLCRED) .AND. C9_BLEST # "10" .AND. C9_BLCRED # "10"
+				dbSkip()
+				Loop
+			Endif
+		#ENDIF
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Valida o produto conforme a mascara         ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		lRet:=ValidMasc((cAliasSC9)->C9_PRODUTO,MV_PAR05)
+		If !lRet
+			dbSkip()
+			Loop
+		Endif
+		nTotLib += (cAliasSC9)->C9_QTDLIB
+		
+		dbSelectArea(cAliasSC9)
+		dbSkip()
+	End
+	
+	If nReg > 0
+		dbGoto(nReg)
+		nReg:=0
+	Endif
+	
+Endif
+    
+oReport:Section(2):PrintLine()
+dbSelectArea(cAliasSC9)
+
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR790  ³ Autor ³ Gilson do Nascimento  ³ Data ³ 05.10.93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Romaneio de Despacho  (Expedicao)                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ MATR790(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+User Function MatR790R3()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL wnrel
+LOCAL tamanho:= Iif(cPaisloc == "MEX","G","M")
+LOCAL titulo:=OemToAnsi("Romaneio de Despacho  (Expedicao)")	//
+LOCAL cDesc1:=OemToAnsi("Emiss„o do Romaneio de Despacho para a Expedicao, Almoxarifado")	//
+LOCAL cDesc2:=OemToAnsi("atraves de intervalo de Pedidos informado na op‡„o Parƒmetros.")	//
+LOCAL cDesc3:=""
+LOCAL CbCont,cabec1,cabec2
+LOCAL cString:="SC9"
+
+cPerg  :="UMTR7901  "
+PRIVATE aReturn := { "Zebrado", 1,"Administracao", 2, 2, 1, "",0 }			//###
+PRIVATE nomeprog:="UMATR790",nLastKey := 0,nBegin:=0,aLinha:={ }
+PRIVATE li:=80,limite:=132,lRodape:=.F.
+PRIVATE nTotQtd:=nTotVal:=0
+wnrel    := "UMATR790"
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cbtxt    := SPACE(10)
+cbcont   := 0
+li       :=80
+m_pag    :=1
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+pergunte("UMTR7901  ",.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                        ³
+//³ mv_par01	     	  Do Pedido                             ³
+//³ mv_par02	     	  Ate o Pedido                          ³
+//³ mv_par03	     	  Faturamento de                        ³
+//³ mv_par04	     	  Faturamento ate                       ³
+//³ mv_par05	     	  Mascara                               ³
+//³ mv_par06	     	  Aglutina Pedidos de Grade             ³
+//³ mv_par07	     	  Qual moeda                            ³
+//³ mv_par08	     	  Um pedido por folha?                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@Titulo,cDesc1,cDesc2,cDesc3,.F.,,,Tamanho)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| C790Imp(@lEnd,wnRel,cString)},Titulo)
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ C790IMP  ³ Autor ³ Rosane Luciane Chene  ³ Data ³ 09.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR790			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function C790Imp(lEnd,WnRel,cString)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL tamanho:= Iif(cPaisloc == "MEX","G","M")
+LOCAL titulo:=OemToAnsi("Romaneio de Despacho  (Expedicao)")
+LOCAL CbCont,cabec1,cabec2
+LOCAL lContinua := .T.,	lFirst := .T.
+LOCAL cPedAnt:="   "
+LOCAL dEmissao := dDatabase
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cbtxt    := SPACE(10)
+cbcont   := 0
+li       :=80
+m_pag    :=1
+nTipo    :=IIF(aReturn[4]==1,15,18)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Definicao dos cabecalhos                                     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+titulo := "ROMANEIO DE DESPACHO - moeda"+ " - " + GetMv("MV_MOEDA" + STR(mv_par07,1))//
+cabec1 := "It Codigo          Desc. Material  UM Quantidade  Valor Unitario IPI ICM/ISS Valor Merc. Entrega   Alm Localiz.     N.F./Serie"
+cabec2 := ""
+// BRA               99 999999999999999 XXXXXXXXXXXXXXX XX 9999999.99 9999,999,999.99  99.99  9999,999,999.99 99/99/9999 99 XXXXXXXXXXXX XXXXXXXXXXXX/XXX
+// SPA              "It C¢digo          Desc. Material  UM   Cantidad  Valor Unitario    IVA      Valor Merc. Entrega   Dep Local.       Fact/Serie"
+// SPA               99 999999999999999 XXXXXXXXXXXXXXX XX 9999999.99 9999,999,999.99  99 99  9999,999,999.99 99/99/9999 99 XXXXXXXXXXXX XXXXXXXXXXXX/XXX
+//                             1         2         3         4         5         6         7         8         9        10        11        12        13        
+//                   012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
+dbSelectArea("SC9")
+dbSetOrder(1)
+dbSeek( xFilial()+mv_par01,.T. )
+
+SetRegua(RecCount())		// Total de Elementos da regua
+
+While !Eof() .AND. C9_PEDIDO <= mv_par02 .AND. lContinua .AND. xFilial() == C9_FILIAL
+	
+	dbSelectArea("SC5")
+	dbSetOrder(1)
+	dbSeek(xFilial()+SC9->C9_PEDIDO)
+	dbSelectArea("SC9")
+	
+	If At(SC5->C5_TIPO,"DB") != 0 .OR. ( !Empty(C9_BLEST) .AND. !Empty(C9_BLCRED) .AND. C9_BLEST # "10" .AND. C9_BLCRED # "10")
+		dbSkip()
+		Loop
+	EndIf
+	
+	dbSelectArea("SC6")
+	dbSetOrder(1)
+	dbSeek(xFilial()+SC9->C9_PEDIDO+SC9->C9_ITEM)
+	
+	dbSelectArea("SF2")
+	dbSetOrder(1)
+	MsSeek(xFilial("SF2")+SC9->C9_NFISCAL+SC9->C9_SERIENF+SC9->C9_CLIENTE+SC9->C9_LOJA)
+
+	dEmissao := SF2->F2_EMISSAO
+	
+	dbSelectArea("SC9")
+	If SF2->F2_EMISSAO < MV_PAR03 .OR. SF2->F2_EMISSAO > MV_PAR04
+		dbSkip()
+		Loop
+	Endif
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Valida o produto conforme a mascara         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	lRet:=ValidMasc(SC9->C9_PRODUTO,MV_PAR05)
+	If !lRet
+		dbSkip()
+		Loop
+	Endif
+	
+	IF lEnd
+		@PROW()+1,001 Psay "CANCELADO PELO OPERADOR"
+		lContinua := .F.
+		Exit
+	Endif
+	
+	IncRegua()
+	
+	IF li > 55 .OR. lFirst
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		lRodape := .T.
+	Endif
+	
+	If C9_PEDIDO # cPedAnt .OR. lFirst
+		cPedAnt:= C9_PEDIDO
+		lFirst := .F.
+		nTotQtd:= 0
+		nTotVal:= 0
+		CPedido:= SC5->C5_NUM
+		dbSelectArea("SA4")
+		dbSeek(xFilial()+SC5->C5_TRANSP)
+		dbSelectArea("SA1")
+		dbSeek(xFilial()+SC5->C5_CLIENTE+SC5->C5_LOJACLI)
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Impressao do Cabecalho do Pedido                             ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		@ li,000 Psay "PEDIDO : "+SC5->C5_NUM				//
+		@ li,020 Psay "EMISSAO : "+DTOC(SC5->C5_EMISSAO)	//
+		li++
+		@ li,000 Psay "CLIENTE : "+SC5->C5_CLIENTE+"/"+SC5->C5_LOJACLI+"-"+SA1->A1_NOME	  //
+		li++
+		@ li,000 Psay "ENDERECO: "+Alltrim(SA1->A1_END) + " - " + Alltrim(SA1->A1_BAIRRO) + " - " + Alltrim(SA1->A1_MUN) +" - "+SA1->A1_EST   //
+		li++
+		If SA4->(FieldPos("A4_NREDUZ"))<>0
+			@ li,000 Psay "TRANSPORTADORA : "+SC5->C5_TRANSP+"-"+SA4->A4_NREDUZ+"  "+"VIA : "+SA4->A4_VIA
+		Else
+			@ li,000 Psay "TRANSPORTADORA : "+SC5->C5_TRANSP+"  "+"VIA : "+SA4->A4_VIA
+		EndIf
+		li++
+		@ li,000 Psay "ENDERECO: "+Alltrim(SA4->A4_END)+ " - " + Alltrim(SA4->A4_MUN)+" - "+SA4->A4_EST   //
+		li++
+		@ li,000 Psay __PrtThinLine()
+		
+	Endif
+	
+	li++
+	ImpItem()
+	
+	dbSelectArea("SC9")
+	dbSkip()
+	
+	If C9_PEDIDO # cPedAnt .OR. Eof()
+		
+		li++
+		@ li,000 Psay __PrtThinLine()
+		li++
+		@ li,000 Psay " T O T A I S "
+		@ li,038 Psay nTotQtd	Picture PESQPICTQT("C6_QTDVEN",10)
+		@ li,071 Psay xMoeda(nTotVal,1,mv_par07,SC5->C5_EMISSAO)	Picture "@E 99,999,999,999.99"
+		
+		Li := Li + 2
+		If MV_PAR08 = 1 .OR. Li + 7 > 55	//1 pedido por folha
+			lFirst := .T.
+			li := 80
+		EndIf
+		
+	Endif
+End
+
+IF lRodape
+	roda(cbcont,cbtxt,"M")
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Restaura a Integridade dos dados                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SC9")
+dbClearFilter()
+dbSetOrder(1)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Se em disco, desvia para Spool                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If aReturn[5] = 1    // Se Saida para disco, ativa SPOOL
+	Set Printer TO
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ ImpItem  ³ Autor ³ Gilson do Nascimento  ³ Data ³ 05.10.93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Impressao de Itens do Romaneio  de Despacho                ³±±
+±±³          ³ Ordem de Impressao : LOCALIZACAO NO ALMOXARIFADO           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ ImpItem(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MatR790                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ImpItem()
+
+LOCAL cMascara :=GetMv("MV_MASCGRD")
+LOCAL nTamRef  :=Val(Substr(cMascara,1,2))
+
+dbSelectArea("SB2")
+dbSeek(xFilial()+SC9->C9_PRODUTO)
+
+dbSelectArea("SC6")
+dbSeek(xFilial()+SC9->C9_PEDIDO+SC9->C9_ITEM)
+
+dbSelectArea("SB1")
+dbSeek(xFilial()+SC6->C6_PRODUTO+SC6->C6_LOCAL)
+
+IF SC6->C6_GRADE == "S" .AND. MV_PAR06 == 1
+	dbSelectArea("SC9")
+	cProdRef:=Substr(C9_PRODUTO,1,nTamRef)
+	cPedido := SC9->C9_PEDIDO
+	nReg    := 0
+	nTotLib := 0
+	
+	While !Eof() .AND. xFilial() == C9_FILIAL .AND. Substr(C9_PRODUTO,1,nTamRef) == cProdRef;
+		.AND. C9_PEDIDO == cPedido
+		nReg:=Recno()
+		If !Empty(C9_BLEST) .AND. !Empty(C9_BLCRED) .AND. C9_BLEST # "10" .AND. C9_BLCRED # "10"
+			dbSkip()
+			Loop
+		Endif
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Valida o produto conforme a mascara         ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		lRet:=ValidMasc(SC9->C9_PRODUTO,MV_PAR05)
+		If !lRet
+			dbSkip()
+			Loop
+		Endif
+		nTotLib += SC9->C9_QTDLIB
+		dbSkip()
+	End
+	If nReg > 0
+		dbGoto(nReg)
+		nReg:=0
+	Endif
+Endif
+
+@li,000 Psay SC9->C9_ITEM
+@li,003 Psay IIF(SC6->C6_GRADE == "S" .AND. MV_PAR06 == 1,Substr(SC9->C9_PRODUTO,1,nTamRef),SC9->C9_PRODUTO)
+@li,019 Psay Left(IIF(Empty(SC6->C6_DESCRI),SB1->B1_DESC,SC6->C6_DESCRI), 15)
+@li,035 Psay SC6->C6_UM
+@li,038 Psay IIF(SC6->C6_GRADE=="S" .AND. MV_PAR06 ==1,nTotLib,SC9->C9_QTDLIB)	Picture PESQPICTQT("C9_QTDLIB",10)
+@li,049 Psay xMoeda(SC9->C9_PRCVEN,1,mv_par07,SC5->C5_EMISSAO)	Picture "@E 9999,999,999.99"
+If ( cPaisloc=="BRA" )
+	@li,066 Psay SB1->B1_IPI				Picture "99"
+	If !Empty(SB1->B1_PICM)
+		@li,069 Psay SB1->B1_PICM			Picture "99"
+	Else
+		@li,069 Psay SB1->B1_ALIQISS		Picture "99"
+	EndIf
+Else
+	@li,066 Psay SB1->B1_IPI				Picture "99.99"
+EndIf
+@li,073 Psay xMoeda(((IIF(SC6->C6_GRADE=="S" .AND. MV_PAR06 ==1,nTotLib,SC9->C9_QTDLIB))*SC9->C9_PRCVEN),1,mv_par07,SC5->C5_EMISSAO)	Picture "@E 9999,999,999.99"
+@li,089 Psay SF2->F2_EMISSAO
+@li,100 Psay SC6->C6_LOCAL
+@li,103 Psay Left(SC6->C6_LOCALIZ,12)
+@li,116 Psay SC9->C9_NFISCAL+"/"+SC9->C9_SERIENF
+nTotQtd += IIF(SC6->C6_GRADE=="S" .AND. MV_PAR06 ==1,nTotLib,SC9->C9_QTDLIB)
+nTotVal += IIF(SC6->C6_GRADE=="S" .AND. MV_PAR06 ==1,nTotLib,SC9->C9_QTDLIB)*SC9->C9_PRCVEN
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ValidPerg º Autor ³ Analistas Microsiga º Data ³ 14/04/2009  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³ Cria o Grupo de Perguntas conforme Parametro                º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ DeNadai                                                     º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function VldPerg( cPerg )
+
+/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+  ³            Declara as Variaveis Locais Utilizadas na Rotina                ³
+  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+Local i,j
+Local aRegs := {}
+
+/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+  ³            Adiciona as Perguntas no Array a ser Gravado no SX1             ³
+  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+
+
+/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+  ³            Adiciona as Perguntas no Array a ser Gravado no SX1             ³
+  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+
+aAdd( aRegs , { cPerg , "01" , "Do Pedido               ?    " , "            " , "            " , "MV_CH1" , "C" , 06 , 0 , 0 , "G" , "" , "MV_PAR01" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "02" , "Ate o Pedido            ?    " , "            " , "            " , "MV_CH2" , "C" , 06 , 0 , 0 , "G" , "" , "MV_PAR02" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "03" , "Faturamento de          ?    " , "            " , "            " , "MV_CH3" , "D" , 08 , 0 , 0 , "G" , "" , "MV_PAR03" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "04" , "Faturamento Ate         ?    " , "            " , "            " , "MV_CH4" , "D" , 08 , 0 , 0 , "G" , "" , "MV_PAR04" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "05" , "Mascara do Produto      ?    " , "            " , "            " , "MV_CH5" , "C" , 15 , 0 , 0 , "G" , "" , "MV_PAR05" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "06" , "Aglutina Prod.Grade     ?    " , "            " , "            " , "MV_CH6" , "N" , 01 , 0 , 0 , "C" , "" , "MV_PAR06" , "Sim" , "Sim" , "Sim" , "" , "" , "Nao" , "Nao" , "Nao" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "07" , "Qual Moeda              ?    " , "            " , "            " , "MV_CH7" , "N" , 01 , 0 , 0 , "C" , "" , "MV_PAR07" , "Moeda1" , "Moeda1" , "Moeda1" , "" , "" , "Moeda2" , "Moeda2" , "Moeda2" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "08" , "Um Pedido por Folha     ?    " , "            " , "            " , "MV_CH8" , "N" , 01 , 0 , 0 , "C" , "" , "MV_PAR08" , "Sim" , "Sim", "Sim" , "" , "" , "Nao" , "Nao" , "Nao" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "09" , "Da Nota Fiscal          ?    " , "            " , "            " , "MV_CH9" , "C" , 09 , 0 , 0 , "G" , "" , "MV_PAR09" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "10" , "Ate a Nota Fiscal       ?    " , "            " , "            " , "MV_CHA" , "C" , 09 , 0 , 0 , "G" , "" , "MV_PAR10" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "11" , "Da Serie       			  ?    " , "            " , "            " , "MV_CHB" , "C" , 03 , 0 , 0 , "G" , "" , "MV_PAR11" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+aAdd( aRegs , { cPerg , "12" , "Ate a Serie       		  ?    " , "            " , "            " , "MV_CHC" , "C" , 03 , 0 , 0 , "G" , "" , "MV_PAR12" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , ""})
+
+
+/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+  ³            Verifica se Ja Existe Registro no SX1 e Grava                   ³
+  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+
+DbSelectArea("SX1")
+DbSetOrder(1)
+
+For i := 1 to Len( aRegs )
+	If !SX1->(dbSeek(cPerg+aRegs[i,2]))
+		RecLock("SX1",.T.)
+		For j:=1 to FCount()
+			If j <= Len(aRegs[i])
+				FieldPut(j,aRegs[i,j])
+			Endif
+		Next
+		SX1->(MsUnlock())
+	Endif
+Next
+
+Return
